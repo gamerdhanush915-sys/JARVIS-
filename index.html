@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#060d18">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Jarvis">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-192.png">
+<title>Jarvis AI</title>
+<style>
+:root{--bg:#060d18;--fg:#e6f1ff;--mute:#8aa0bd;--card:#0d1829;--line:#1c2f4a;--a:#2aa4ff;--b:#27e0f0;--glow:rgba(42,164,255,.45)}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--fg);font-family:system-ui,-apple-system,"Segoe UI",sans-serif;display:flex;justify-content:center;padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0)}
+main{width:100%;max-width:560px;height:100%;display:flex;flex-direction:column;padding:16px}
+header{text-align:center;position:relative;padding-top:8px}
+h1{margin:0;font-size:22px;letter-spacing:.35em;font-weight:600}
+.sub{color:var(--mute);font-size:13px;margin-top:4px}
+#gear{position:absolute;right:0;top:6px;background:none;border:0;color:var(--mute);font-size:22px;cursor:pointer}
+#log{flex:1;overflow-y:auto;margin:14px 0;display:flex;flex-direction:column;gap:10px;padding:4px}
+.m{max-width:86%;padding:10px 14px;border-radius:16px;font-size:15px;line-height:1.45;border:1px solid var(--line);background:var(--card);white-space:pre-wrap}
+.m.u{align-self:flex-end;border-color:var(--a)}
+.hint{color:var(--mute);text-align:center;font-size:14px;margin:auto}
+.stage{display:flex;flex-direction:column;align-items:center;gap:10px}
+#orb{width:104px;height:104px;border-radius:50%;border:0;cursor:pointer;background:radial-gradient(circle at 35% 30%,var(--b),var(--a) 70%);box-shadow:0 0 36px var(--glow)}
+#orb.listening{animation:pulse 1.2s infinite}
+#orb.thinking{animation:spin 1.1s linear infinite;background:conic-gradient(var(--a),var(--b),var(--a))}
+#orb.speaking{animation:talk .55s ease-in-out infinite alternate}
+@keyframes pulse{0%{box-shadow:0 0 0 0 var(--glow),0 0 36px var(--glow)}100%{box-shadow:0 0 0 34px transparent,0 0 36px var(--glow)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes talk{from{transform:scale(.95)}to{transform:scale(1.1)}}
+#status{font-size:13px;color:var(--mute);min-height:18px;text-align:center}
+form{display:flex;gap:8px;width:100%}
+input{flex:1;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--fg);font-size:16px;outline:none;min-width:0}
+input:focus{border-color:var(--a)}
+button.go{padding:0 16px;border-radius:12px;border:0;background:var(--a);color:#06121f;font-weight:700;font-size:15px}
+.link{background:none;border:0;color:var(--mute);font-size:12px;cursor:pointer;text-decoration:underline}
+#set{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;padding:20px}
+#set.open{display:flex}
+#set .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;width:100%;max-width:420px;display:flex;flex-direction:column;gap:10px}
+#set h2{margin:0;font-size:18px}
+#set p{margin:0;color:var(--mute);font-size:13px;line-height:1.4}
+select{padding:12px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--fg);font-size:16px}
+.row{display:flex;gap:8px}
+.row button{flex:1;padding:12px;border-radius:12px;border:1px solid var(--line);background:none;color:var(--fg);font-size:15px}
+.row button.p{background:var(--a);color:#06121f;border:0;font-weight:700}
+</style>
+</head>
+<body>
+<main>
+  <header><h1>JARVIS</h1><div class="sub">Your voice assistant</div><button id="gear" aria-label="Settings">⚙</button></header>
+  <div id="log"><div class="hint" id="hint">Tap the orb and say something.</div></div>
+  <div class="stage">
+    <button id="orb" aria-label="Talk to Jarvis"></button>
+    <div id="status">Tap to speak</div>
+    <form id="f"><input id="t" placeholder="Or type a message…" autocomplete="off"><button class="go" type="submit">Send</button></form>
+    <button class="link" id="vm">Voice replies: on</button>
+  </div>
+</main>
+<div id="set"><div class="box">
+  <h2>Settings</h2>
+  <p>Paste your free Gemini API key (from aistudio.google.com). It is saved only on this device and sent only to Google.</p>
+  <input id="key" type="password" placeholder="AIza…" autocomplete="off">
+  <select id="model">
+    <option value="gemini-2.5-flash">Gemini 2.5 Flash (smarter)</option>
+    <option value="gemini-2.5-flash-lite">Gemini 2.5 Flash-Lite (faster, higher limits)</option>
+  </select>
+  <div class="row"><button id="clr">Clear chat</button><button class="p" id="save">Save</button></div>
+</div></div>
+<script>
+(function(){
+var $=function(i){return document.getElementById(i)};
+var orb=$('orb'),st=$('status'),log=$('log'),hint=$('hint'),inp=$('t'),vm=$('vm'),set=$('set');
+var history=[],busy=false,voiceOn=true,rec=null;
+var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+function ls(k,v){try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v)}catch(e){return null}}
+function setState(s,t){orb.className=s;st.textContent=t}
+function add(role,text){
+  if(hint){hint.remove();hint=null}
+  var d=document.createElement('div');d.className='m '+(role==='user'?'u':'');d.textContent=text;
+  log.appendChild(d);log.scrollTop=log.scrollHeight;
+}
+function openSet(){$('key').value=ls('jarvis_key')||'';$('model').value=ls('jarvis_model')||'gemini-2.5-flash';set.classList.add('open')}
+$('gear').onclick=openSet;
+$('save').onclick=function(){ls('jarvis_key',$('key').value.trim());ls('jarvis_model',$('model').value);set.classList.remove('open');setState('','Tap to speak')};
+$('clr').onclick=function(){history=[];log.innerHTML='<div class="hint">Chat cleared.</div>';hint=null;set.classList.remove('open')};
+function speak(text){
+  return new Promise(function(res){
+    if(!voiceOn||!window.speechSynthesis){res();return}
+    try{
+      speechSynthesis.cancel();
+      var u=new SpeechSynthesisUtterance(text.replace(/[*_#`>]/g,''));
+      var vs=speechSynthesis.getVoices();
+      var v=vs.find(function(x){return /^en[-_](GB|US)/i.test(x.lang)&&/male|daniel|arthur|alex/i.test(x.name)})||vs.find(function(x){return /^en/i.test(x.lang)});
+      if(v)u.voice=v;u.rate=1.02;u.pitch=.9;
+      u.onend=u.onerror=function(){res()};
+      speechSynthesis.speak(u);
+    }catch(e){res()}
+  });
+}
+async function callClaude(){
+  var key=ls('jarvis_key');
+  if(!key){var e=new Error('nokey');throw e}
+  var now=new Date().toLocaleString([], {dateStyle:'full',timeStyle:'short'});
+  var sys='You are Jarvis, a calm, witty, helpful voice assistant in the spirit of a butler-style AI. Your replies are spoken aloud: keep them to 1–3 short sentences unless the user asks for detail, plain text only, no markdown, no lists, no emoji. The current local date and time is '+now+'. You have no live data such as weather or news; say so briefly if asked.';
+  var msgs=history.slice(-16);
+  while(msgs.length&&msgs[0].role!=='user')msgs.shift();
+  var contents=msgs.map(function(m){return {role:m.role==='assistant'?'model':'user',parts:[{text:m.content}]}});
+  var model=ls('jarvis_model')||'gemini-2.5-flash';
+  var r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+model+':generateContent',{method:'POST',headers:{'content-type':'application/json','x-goog-api-key':key},body:JSON.stringify({systemInstruction:{parts:[{text:sys}]},contents:contents,generationConfig:{maxOutputTokens:600,thinkingConfig:{thinkingBudget:0}}})});
+  if(!r.ok){var er=new Error('http');er.status=r.status;throw er}
+  var j=await r.json();
+  var c=j.candidates&&j.candidates[0]&&j.candidates[0].content;
+  return ((c&&c.parts)||[]).map(function(p){return p.text||''}).join('').trim();
+}
+async function ask(q){
+  q=(q||'').trim();if(!q||busy)return;busy=true;
+  add('user',q);history.push({role:'user',content:q});
+  setState('thinking','Thinking…');
+  var reply;
+  try{reply=await callClaude()||'I’m afraid I have nothing to say to that.'}
+  catch(e){
+    history.pop();
+    if(e.message==='nokey'){reply='Please add your API key in settings first.';setTimeout(openSet,300)}
+    else if(e.status===400||e.status===401||e.status===403){reply='Google rejected the request. Please check your API key in settings.'}
+    else if(e.status===429){reply='I’ve hit the free daily or per-minute limit. Give me a minute, or try again later.'}
+    else{reply='I couldn’t reach Google. Check your connection.'}
+  }
+  if(reply&&history[history.length-1]&&history[history.length-1].role==='user')history.push({role:'assistant',content:reply});
+  add('garvis',reply);
+  setState('speaking','Speaking…');
+  await speak(reply);
+  busy=false;setState('','Tap to speak');
+}
+function listen(){
+  if(busy)return;
+  if(!SR){st.textContent='Voice input isn’t supported in this browser. Please type instead.';return}
+  if(rec){try{rec.stop()}catch(e){}return}
+  if(window.speechSynthesis)speechSynthesis.cancel();
+  rec=new SR();rec.lang=navigator.language||'en-US';rec.interimResults=true;rec.continuous=false;
+  var finalT='',got=false;
+  rec.onstart=function(){setState('listening','Listening…')};
+  rec.onresult=function(ev){
+    var interim='';
+    for(var i=ev.resultIndex;i<ev.results.length;i++){
+      var tr=ev.results[i][0].transcript;
+      if(ev.results[i].isFinal){finalT+=tr;got=true}else interim+=tr;
+    }
+    st.textContent=(finalT+interim)||'Listening…';
+  };
+  rec.onerror=function(ev){setState('',ev.error==='not-allowed'?'Microphone access was blocked.':ev.error==='no-speech'?'I didn’t catch anything.':'Voice input error.')};
+  rec.onend=function(){rec=null;if(got&&finalT.trim())ask(finalT);else if(orb.className==='listening')setState('','Tap to speak')};
+  try{rec.start()}catch(e){rec=null;setState('','Couldn’t start the microphone.')}
+}
+orb.onclick=function(){
+  if(busy&&window.speechSynthesis&&speechSynthesis.speaking){speechSynthesis.cancel();return}
+  listen();
+};
+$('f').onsubmit=function(e){e.preventDefault();var v=inp.value;inp.value='';ask(v)};
+vm.onclick=function(){voiceOn=!voiceOn;vm.textContent='Voice replies: '+(voiceOn?'on':'off');if(!voiceOn&&window.speechSynthesis)speechSynthesis.cancel()};
+if(window.speechSynthesis)speechSynthesis.getVoices();
+if(!ls('jarvis_key'))st.textContent='Tap ⚙ to add your API key';
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(function(){});
+})();
+</script>
+</body>
+</html>
