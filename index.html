@@ -66,8 +66,9 @@ select{padding:12px;border-radius:12px;border:1px solid var(--line);background:v
   <p>Paste your free Gemini API key (from aistudio.google.com). It is saved only on this device and sent only to Google.</p>
   <input id="key" type="password" placeholder="AIza…" autocomplete="off">
   <select id="model">
-    <option value="gemini-2.5-flash">Gemini 2.5 Flash (smarter)</option>
-    <option value="gemini-2.5-flash-lite">Gemini 2.5 Flash-Lite (faster, higher limits)</option>
+    <option value="gemini-flash-latest">Gemini Flash (latest, recommended)</option>
+    <option value="gemini-3.8-flash">Gemini 3.8 Flash</option>
+    <option value="gemini-flash-lite-latest">Gemini Flash-Lite (faster, higher limits)</option>
   </select>
   <div class="row"><button id="clr">Clear chat</button><button class="p" id="save">Save</button></div>
 </div></div>
@@ -84,9 +85,9 @@ function add(role,text){
   var d=document.createElement('div');d.className='m '+(role==='user'?'u':'');d.textContent=text;
   log.appendChild(d);log.scrollTop=log.scrollHeight;
 }
-function openSet(){$('key').value=ls('jarvis_key')||'';$('model').value=ls('jarvis_model')||'gemini-2.5-flash';set.classList.add('open')}
+function openSet(){$('key').value=ls('jarvis_key')||'';$('model').value=ls('jarvis_model2')||'gemini-flash-latest';set.classList.add('open')}
 $('gear').onclick=openSet;
-$('save').onclick=function(){ls('jarvis_key',$('key').value.trim());ls('jarvis_model',$('model').value);set.classList.remove('open');setState('','Tap to speak')};
+$('save').onclick=function(){ls('jarvis_key',$('key').value.trim());ls('jarvis_model2',$('model').value);set.classList.remove('open');setState('','Tap to speak')};
 $('clr').onclick=function(){history=[];log.innerHTML='<div class="hint">Chat cleared.</div>';hint=null;set.classList.remove('open')};
 function speak(text){
   return new Promise(function(res){
@@ -110,8 +111,8 @@ async function callClaude(){
   var msgs=history.slice(-16);
   while(msgs.length&&msgs[0].role!=='user')msgs.shift();
   var contents=msgs.map(function(m){return {role:m.role==='assistant'?'model':'user',parts:[{text:m.content}]}});
-  var model=ls('jarvis_model')||'gemini-2.5-flash';
-  var r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+model+':generateContent?key='+encodeURIComponent(key),{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({systemInstruction:{parts:[{text:sys}]},contents:contents,generationConfig:{maxOutputTokens:600,thinkingConfig:{thinkingBudget:0}}})});
+  var model=ls('jarvis_model2')||'gemini-flash-latest';
+  var r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+model+':generateContent?key='+encodeURIComponent(key),{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({systemInstruction:{parts:[{text:sys}]},contents:contents,generationConfig:{maxOutputTokens:1500}})});
   if(!r.ok){var er=new Error('http');er.status=r.status;try{var ej=await r.json();er.detail=(ej.error&&ej.error.message)||''}catch(x){}throw er}
   var j=await r.json();
   var c=j.candidates&&j.candidates[0]&&j.candidates[0].content;
