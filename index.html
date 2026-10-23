@@ -103,7 +103,7 @@ function speak(text){
   });
 }
 async function callClaude(){
-  var key=ls('jarvis_key');
+  var key=(ls('jarvis_key')||'').replace(/\s+/g,'');
   if(!key){var e=new Error('nokey');throw e}
   var now=new Date().toLocaleString([], {dateStyle:'full',timeStyle:'short'});
   var sys='You are Jarvis, a calm, witty, helpful voice assistant in the spirit of a butler-style AI. Your replies are spoken aloud: keep them to 1–3 short sentences unless the user asks for detail, plain text only, no markdown, no lists, no emoji. The current local date and time is '+now+'. You have no live data such as weather or news; say so briefly if asked.';
@@ -111,8 +111,8 @@ async function callClaude(){
   while(msgs.length&&msgs[0].role!=='user')msgs.shift();
   var contents=msgs.map(function(m){return {role:m.role==='assistant'?'model':'user',parts:[{text:m.content}]}});
   var model=ls('jarvis_model')||'gemini-2.5-flash';
-  var r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+model+':generateContent',{method:'POST',headers:{'content-type':'application/json','x-goog-api-key':key},body:JSON.stringify({systemInstruction:{parts:[{text:sys}]},contents:contents,generationConfig:{maxOutputTokens:600,thinkingConfig:{thinkingBudget:0}}})});
-  if(!r.ok){var er=new Error('http');er.status=r.status;throw er}
+  var r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+model+':generateContent?key='+encodeURIComponent(key),{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({systemInstruction:{parts:[{text:sys}]},contents:contents,generationConfig:{maxOutputTokens:600,thinkingConfig:{thinkingBudget:0}}})});
+  if(!r.ok){var er=new Error('http');er.status=r.status;try{var ej=await r.json();er.detail=(ej.error&&ej.error.message)||''}catch(x){}throw er}
   var j=await r.json();
   var c=j.candidates&&j.candidates[0]&&j.candidates[0].content;
   return ((c&&c.parts)||[]).map(function(p){return p.text||''}).join('').trim();
@@ -129,6 +129,7 @@ async function ask(q){
     else if(e.status===400||e.status===401||e.status===403){reply='Google rejected the request. Please check your API key in settings.'}
     else if(e.status===429){reply='I’ve hit the free daily or per-minute limit. Give me a minute, or try again later.'}
     else{reply='I couldn’t reach Google. Check your connection.'}
+    if(e.message!=='nokey'){reply+=' ['+(e.status?('Error '+e.status+': '+(e.detail||'').slice(0,160)):('Network: '+(e.message||'failed')))+']'}
   }
   if(reply&&history[history.length-1]&&history[history.length-1].role==='user')history.push({role:'assistant',content:reply});
   add('garvis',reply);
