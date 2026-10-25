@@ -331,6 +331,7 @@ html[data-anim="reduced"] #orb.speaking .r2,html[data-anim="reduced"] #orb.think
   <div class="sbody">
     <div class="card"><h3>AI connection</h3>
       <label>API key<input type="password" id="key" data-k="key" placeholder="Paste your API key" autocomplete="off"><small>Saved only on this device.</small></label>
+      <label>Coding API key (optional)<input type="password" id="ckey" data-k="ckey" placeholder="Paste your coding API key" autocomplete="off"><small>Used when you ask for code. Saved only on this device. Leave empty to use the normal AI for code.</small></label>
       <div class="btns"><button class="btn" id="test">Test connection</button></div>
       <div id="kmsg"></div>
     </div>
@@ -407,7 +408,7 @@ html[data-anim="reduced"] #orb.speaking .r2,html[data-anim="reduced"] #orb.think
 <script>
 (function(){
 var $=function(i){return document.getElementById(i)};
-var D={key:'',model:'gemini-flash-lite-latest',voice:'',rate:1,pitch:.9,lang:'en-US',persona:'butler',custom:'',name:'',length:'short',theme:'hud',accent:'red',voiceOn:true,auto:false,code:false,weather:false,city:'',units:'c',hud:true,images:true,imgStyle:'',anim:'full',lat:null,lon:null,saveChat:true,wake:false,mem:[]};
+var D={key:'',ckey:'',model:'gemini-flash-lite-latest',voice:'',rate:1,pitch:.9,lang:'en-US',persona:'butler',custom:'',name:'',length:'short',theme:'hud',accent:'red',voiceOn:true,auto:false,code:false,weather:false,city:'',units:'c',hud:true,images:true,imgStyle:'',anim:'full',lat:null,lon:null,saveChat:true,wake:false,mem:[]};
 var cfg=load(),history=[],busy=false,rec=null,blocked=false,wx=null,wxAt=0,wt=null;
 function load(){var c={};try{c=JSON.parse(localStorage.getItem('jarvis_cfg')||'{}')}catch(e){}
   if(!c.key){try{c.key=localStorage.getItem('jarvis_key')||''}catch(e){}}var o=Object.assign({},D,c);if(c.tv!==2){o.theme='hud';o.accent='red';o.tv=2}return o}
@@ -516,6 +517,24 @@ async function gemini(msgs,system,maxTok,o){
   var c=j.candidates&&j.candidates[0]&&j.candidates[0].content;
   return ((c&&c.parts)||[]).map(function(p){return p.text||''}).join('').trim();
 }
+async function claude(msgs,system,maxTok,timeout){
+  var key=(cfg.ckey||'').replace(/\s+/g,'');
+  var m=msgs.map(function(x){
+    var parts=(x.files||[]).map(function(f){
+      if(/^image\//.test(f.mime))return {type:'image',source:{type:'base64',media_type:f.mime,data:f.data}};
+      if(f.mime==='application/pdf')return {type:'document',source:{type:'base64',media_type:f.mime,data:f.data}};
+      return null}).filter(Boolean);
+    parts.push({type:'text',text:x.content||' '});
+    return {role:x.role==='assistant'?'assistant':'user',content:parts}});
+  var ctl=new AbortController(),tm=setTimeout(function(){ctl.abort()},timeout||60000);
+  try{
+    var r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'content-type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-5-5',max_tokens:maxTok||4000,system:system,messages:m}),signal:ctl.signal});
+    clearTimeout(tm);
+    if(!r.ok){var er=new Error('http');er.status=r.status;try{var ej=await r.json();er.detail=(ej.error&&ej.error.message)||''}catch(x){}throw er}
+    var j=await r.json();
+    return (j.content||[]).map(function(p){return p.text||''}).join('').trim();
+  }catch(e){clearTimeout(tm);throw e}
+}
 function errText(e){
   if(e.message==='nokey')return 'Please add your API key in settings first.';
   if(!navigator.onLine)return 'You appear to be offline. Check your connection and try again.';
@@ -543,7 +562,11 @@ async function ask(q){
   setState('thinking',code?'Writing code…':'Thinking…');var typing=dots(),reply,ok=true;
   try{
     var msgs=history.slice(-16);while(msgs.length&&msgs[0].role!=='user')msgs.shift();
-    reply=await gemini(msgs,sysPrompt(await liveCtx(),code),code?4000:800,{smart:code||files.length>0,timeout:code?45000:(files.length?25000:12000)})||'I’m afraid I have nothing to say to that.';
+    var sp=sysPrompt(await liveCtx(),code);
+    if(code&&(cfg.ckey||'').trim()){
+      try{reply=await claude(msgs,sp,4000,60000)}catch(ce){console.warn('Claude failed, using fallback',ce);st.textContent='Switching model…';reply=''}
+    }
+    if(!reply)reply=await gemini(msgs,sp,code?4000:800,{smart:code||files.length>0,timeout:code?45000:(files.length?25000:12000)})||'I’m afraid I have nothing to say to that.';
   }catch(e){ok=false;history.pop();reply=errText(e);if(e.message==='nokey')setTimeout(openSet,400)}
   typing.remove();
   if(ok){delete entry.files;history.push({role:'assistant',content:reply})}
@@ -955,7 +978,7 @@ document.querySelectorAll('[data-k]').forEach(function(el){
   var ev=(el.type==='checkbox'||el.tagName==='SELECT')?'change':'input';
   el.addEventListener(ev,function(){
     var k=el.dataset.k,v=el.type==='checkbox'?el.checked:el.type==='range'?parseFloat(el.value):el.value;
-    if(k==='key')v=v.trim();cfg[k]=v;save();if(el.type==='checkbox')syncK();
+    if(k==='key'||k==='ckey')v=v.trim();cfg[k]=v;save();if(el.type==='checkbox')syncK();
     if(k==='persona')$('cw').style.display=v==='custom'?'flex':'none';
     if(k==='theme'||k==='anim')applyTheme();if(k==='auto')liveUi();pill();hud();
     if(k==='saveChat'){if(v)saveChat();else{try{localStorage.removeItem('jarvis_chat')}catch(e){}}}
