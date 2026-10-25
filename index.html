@@ -190,13 +190,15 @@ html[data-theme="hud"] .tile::before{content:"";position:absolute;top:-1px;left:
 html[data-theme="hud"] .tile::after{content:"";position:absolute;right:-1px;bottom:-1px;width:11px;height:11px;border:2px solid var(--b);border-left:0;border-top:0}
 html[data-theme="hud"] .plus,html[data-theme="hud"] .tile,html[data-theme="hud"] .tg,html[data-theme="hud"] .ac{border-radius:4px}
 html[data-theme="hud"] #sheet .panel{border-radius:10px 10px 0 0}
+.cp{align-self:flex-start;margin:-4px 0 0 6px;background:none;border:0;color:var(--mute);font:600 10.5px ui-monospace,Menlo,Consolas,monospace;letter-spacing:.12em;text-transform:uppercase;padding:2px 6px}
+.cp:active{color:var(--a)}
 </style>
 </head>
 <body>
 <div id="app">
   <header>
     <div class="brand"><div class="logo"></div><h1>JARVIS</h1><span class="pill" id="pill"><i></i><em id="pt" style="font-style:normal">No key</em></span></div>
-    <button class="icn" id="gear" aria-label="Settings">⚙︎</button>
+    <div style="display:flex;gap:8px"><button class="icn" id="newc" aria-label="New chat">✎</button><button class="icn" id="gear" aria-label="Settings">⚙︎</button></div>
   </header>
   <div id="hud"></div>
   <div id="log"></div>
@@ -205,6 +207,7 @@ html[data-theme="hud"] #sheet .panel{border-radius:10px 10px 0 0}
     <div class="wave" id="wave"><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b></div>
     <button id="orb" aria-label="Talk"><span class="r1"></span><span class="r3"></span><span class="r2"></span><span class="core"></span></button>
     <button class="live" id="live"></button>
+    <button class="live on" id="stopb" style="display:none">■ Stop speaking</button>
     <div id="att"></div>
     <form id="f"><button type="button" class="plus" id="plus" aria-label="Add to chat">+</button><input type="text" id="t" placeholder="Message Jarvis…" autocomplete="off"><button class="send" type="submit" aria-label="Send">➤</button></form>
   </div>
@@ -254,6 +257,7 @@ html[data-theme="hud"] #sheet .panel{border-radius:10px 10px 0 0}
     <div class="card"><h3>Voice</h3>
       <div class="row"><span>Spoken replies<small>Jarvis talks back</small></span><label class="sw"><input type="checkbox" data-k="voiceOn"><i></i></label></div>
       <div class="row"><span>Live chat<small>Hands-free: listens again after each reply</small></span><label class="sw"><input type="checkbox" data-k="auto"><i></i></label></div>
+      <div class="row"><span>Wake word<small>Say “Hey Jarvis” (experimental, mic stays on while app is open)</small></span><label class="sw"><input type="checkbox" data-k="wake"><i></i></label></div>
       <label>Voice<select id="voice" data-k="voice"><option value="">Auto</option></select></label>
       <label>Speed <input type="range" min=".7" max="1.4" step=".05" data-k="rate"></label>
       <label>Pitch <input type="range" min=".6" max="1.4" step=".05" data-k="pitch"></label>
@@ -289,9 +293,20 @@ html[data-theme="hud"] #sheet .panel{border-radius:10px 10px 0 0}
         <button class="dot" data-ac="pink" style="background:linear-gradient(135deg,#ff4f8b,#ff9a6b)" aria-label="Pink"></button></div></label>
     </div>
 
+    <div class="card"><h3>Memory</h3>
+      <label>What Jarvis remembers<textarea rows="4" id="memBox" placeholder="Say “remember that I like jazz”, or type one fact per line"></textarea></label>
+      <p class="note">Jarvis uses these facts in every chat. Say “forget everything” to clear them.</p>
+    </div>
+
+    <div class="card"><h3>App</h3>
+      <div class="btns"><button class="btn" id="inst" style="display:none">Install app</button></div>
+      <p class="note" id="instn"></p>
+    </div>
+
     <div class="card"><h3>Data</h3>
+      <div class="row"><span>Save chat<small>Keep your conversation on this device</small></span><label class="sw"><input type="checkbox" data-k="saveChat"><i></i></label></div>
       <div class="btns"><button class="btn" id="clr">Clear chat</button><button class="btn d" id="rst">Reset all</button></div>
-      <p class="note">Chats stay in this tab only and aren’t saved. Free-tier usage may be used by the AI provider to improve its products, so avoid sharing private information.</p>
+      <p class="note">Saved chat and memory stay on this device only. Free-tier usage may be used by the AI provider to improve its products, so avoid sharing private information.</p>
     </div>
     <button class="btn p" id="done" style="flex:none">Done</button>
   </div>
@@ -300,7 +315,7 @@ html[data-theme="hud"] #sheet .panel{border-radius:10px 10px 0 0}
 <script>
 (function(){
 var $=function(i){return document.getElementById(i)};
-var D={key:'',model:'gemini-flash-lite-latest',voice:'',rate:1,pitch:.9,lang:'en-US',persona:'butler',custom:'',name:'',length:'short',theme:'hud',accent:'red',voiceOn:true,auto:false,code:false,weather:false,city:'',units:'c',hud:true,images:true,imgStyle:'',anim:'full',lat:null,lon:null};
+var D={key:'',model:'gemini-flash-lite-latest',voice:'',rate:1,pitch:.9,lang:'en-US',persona:'butler',custom:'',name:'',length:'short',theme:'hud',accent:'red',voiceOn:true,auto:false,code:false,weather:false,city:'',units:'c',hud:true,images:true,imgStyle:'',anim:'full',lat:null,lon:null,saveChat:true,wake:false,mem:[]};
 var cfg=load(),history=[],busy=false,rec=null,blocked=false,wx=null,wxAt=0,wt=null;
 function load(){var c={};try{c=JSON.parse(localStorage.getItem('jarvis_cfg')||'{}')}catch(e){}
   if(!c.key){try{c.key=localStorage.getItem('jarvis_key')||''}catch(e){}}var o=Object.assign({},D,c);if(c.tv!==2){o.theme='hud';o.accent='red';o.tv=2}return o}
@@ -313,14 +328,19 @@ function applyTheme(){
   document.querySelectorAll('#acc .dot').forEach(function(d){d.classList.toggle('sel',d.dataset.ac===cfg.accent)});
 }
 function pill(){var ok=!!cfg.key.trim();$('pill').className='pill'+(ok?' ok':'');$('pt').textContent=ok?'Ready':'No key'}
-function setState(s,t){orb.className=s;document.body.dataset.s=s;st.textContent=t}
+function setState(s,t){
+  if(s===''&&cfg.wake&&SR&&t==='Tap the orb to speak')t='Say “Hey Jarvis” or tap the orb';
+  orb.className=s;document.body.dataset.s=s;st.textContent=t;
+  var sb=$('stopb');if(sb)sb.style.display=s==='speaking'?'':'none';
+  if(s==='')setTimeout(startWake,700);
+}
 function empty(){
   log.innerHTML='';
   var e=document.createElement('div');e.className='empty';
   var nm=cfg.name?', '+cfg.name:'';
   e.innerHTML='<h2>Hello'+nm.replace(/</g,'')+'.</h2><p>'+(cfg.key.trim()?'How can I help you today?':'Add your free API key to get started.')+'</p>';
   if(cfg.key.trim()){var c=document.createElement('div');c.className='chips';
-    ['What’s the weather?','Draw a neon futuristic city','What time is it?','Tell me a fun fact'].forEach(function(t){var b=document.createElement('button');b.className='chip';b.textContent=t;b.onclick=function(){ask(t)};c.appendChild(b)});e.appendChild(c)}
+    ['What’s the weather?','Draw a neon futuristic city','What time is it?','Tell me a fun fact','Remind me in 5 minutes to stretch'].forEach(function(t){var b=document.createElement('button');b.className='chip';b.textContent=t;b.onclick=function(){ask(t)};c.appendChild(b)});e.appendChild(c)}
   else{var b=document.createElement('button');b.className='cta';b.textContent='Open settings';b.onclick=openSet;e.appendChild(b)}
   log.appendChild(e);
 }
@@ -357,7 +377,7 @@ function listen(){
   if(!SR){st.textContent='Voice input isn’t supported in this browser. Please type.';return}
   if(rec){try{rec.stop()}catch(e){}return}
   if(window.speechSynthesis)speechSynthesis.cancel();
-  rec=new SR();rec.lang=cfg.lang;rec.interimResults=true;rec.continuous=false;
+  stopWake();rec=new SR();rec.lang=cfg.lang;rec.interimResults=true;rec.continuous=false;
   var fin='',got=false;
   rec.onstart=function(){setState('listening','Listening…')};
   rec.onresult=function(ev){var itm='';
@@ -404,6 +424,8 @@ async function gemini(msgs,system,maxTok,o){
 }
 function errText(e){
   if(e.message==='nokey')return 'Please add your API key in settings first.';
+  if(!navigator.onLine)return 'You appear to be offline. Check your connection and try again.';
+  if(e.name==='AbortError')return 'The AI took too long to answer. Please try again.';
   var d=e.status?' ['+e.status+(e.detail?': '+e.detail.slice(0,140):'')+']':' ['+(e.message||'network')+']';
   if(e.status===400||e.status===401||e.status===403)return 'The AI service rejected the request. Check your API key in settings.'+d;
   if(e.status===429)return 'I’ve hit the free usage limit. Try again in a minute.'+d;
@@ -413,13 +435,14 @@ async function ask(q){
   var files=atts.slice();
   q=(q||'').trim();if((!q&&!files.length)||busy)return;
   if(!q)q=files.some(function(f){return f.mime})?'Look at this and tell me what you see, or answer any question in it.':'Review this file and explain it.';
-  busy=true;atts=[];renderAtt();
+  busy=true;stopWake();atts=[];renderAtt();
   addUser(q,files);
   var content=q;files.forEach(function(f){if(f.text)content+='\n\nFile '+f.name+':\n```\n'+f.text.slice(0,40000)+'\n```'});
   var entry={role:'user',content:content,files:files.filter(function(f){return f.data}).map(function(f){return {mime:f.mime,data:f.data}})};
   history.push(entry);
   if(!files.length&&MADE.test(q)){var mr='Dhanush created me.';var md=add('g','');typeOut(md,mr);history.push({role:'assistant',content:mr});setState('speaking','Speaking…');await speak(mr);busy=false;setState('','Tap the orb to speak');if(cfg.auto)setTimeout(listen,300);return}
   if(!files.length&&TECH.test(q)){var tr='I am running on Jarvis AI technology.';var td=add('g','');typeOut(td,tr);history.push({role:'assistant',content:tr});setState('speaking','Speaking…');await speak(tr);busy=false;setState('','Tap the orb to speak');if(cfg.auto)setTimeout(listen,300);return}
+  if(!files.length){var lr=localCmd(q);if(lr){await say(lr);return}}
   var code=!!cfg.code||CODE.test(q)||files.some(function(f){return f.text&&f.code});
   if(!files.length&&VID.test(q)){var vr='I can’t make videos yet, because free video generation isn’t available. I can create an image of it instead if you like.';typeOut(add('g',''),vr);history.push({role:'assistant',content:vr});setState('speaking','Speaking…');await speak(vr);busy=false;setState('','Tap the orb to speak');if(cfg.auto)setTimeout(listen,300);return}
   if(!files.length&&cfg.images&&IMG.test(q)){await makeImage(q);busy=false;setState('','Tap the orb to speak');if(cfg.auto)setTimeout(listen,300);return}
@@ -432,6 +455,7 @@ async function ask(q){
   if(ok){delete entry.files;history.push({role:'assistant',content:reply})}
   var d=add('g','');
   if(/```|\*\*|^#{1,4}\s|^\s*[-*]\s/m.test(reply))renderMd(d,reply);else typeOut(d,reply);
+  if(ok)addCopy(d,reply);
   if(ok){setState('speaking','Speaking…  (tap orb to stop)');await speak(speakText(reply))}
   busy=false;setState('','Tap the orb to speak');
   if(ok&&cfg.auto&&!$('settings').classList.contains('open'))setTimeout(listen,300);
@@ -475,6 +499,7 @@ async function liveCtx(){
     if(w)s+=' Live weather for '+w.place+': '+w.temp+w.u+' (feels like '+w.feels+w.u+'), '+w.desc+', humidity '+w.hum+'%, wind '+w.wind+' '+w.ws+'; today high '+w.hi+w.u+', low '+w.lo+w.u+', rain chance '+w.rain+'%. Use this when asked about weather.';
     else s+=' Live weather is turned on but unavailable right now (location permission or network); say so if asked about weather.';
   }else s+=' You have no weather data; if asked, say the user can turn on Live weather in settings.';
+  if(cfg.mem&&cfg.mem.length)s+=' Facts the user asked you to remember: '+cfg.mem.join('; ')+'.';
   return s;
 }
 var MADE=/\b(who|how)\s+(?:\w+\s+){0,2}(creat\w*|made|built|develop\w*|design\w*|program\w*|invent\w*)\s+(you|u)\b|\b(who|what)\s+(is|was|’s|'s)\s+(your|ur)\s+(creator|developer|maker|owner|father|builder)\b|\b(your|ur)\s+(creator|developer|maker)\b.*\?/i;
@@ -635,10 +660,161 @@ $('plus').onclick=openSheet;$('sx').onclick=closeSheet;sh.querySelector('.scrim'
   $('f'+k).onchange=function(){var l=Array.from(this.files);this.value='';closeSheet();addFiles(l)};
 });
 
+/* ---------- saved chat, copy, memory, reminders, wake word, install ---------- */
+var rems=[],wrec=null,wakeBlocked=false,deferred=null;
+try{rems=JSON.parse(localStorage.getItem('jarvis_rem')||'[]')}catch(e){}
+function saveRem(){try{localStorage.setItem('jarvis_rem',JSON.stringify(rems))}catch(e){}}
+function saveChat(){
+  if(cfg.saveChat===false)return;
+  try{
+    if(!history.length){localStorage.removeItem('jarvis_chat');return}
+    localStorage.setItem('jarvis_chat',JSON.stringify(history.slice(-40).map(function(m){return {role:m.role,content:String(m.content||'').slice(0,m.role==='user'?3000:6000)}})));
+  }catch(e){}
+}
+function restoreChat(){
+  if(cfg.saveChat===false)return;
+  var s=[];try{s=JSON.parse(localStorage.getItem('jarvis_chat')||'[]')}catch(e){}
+  if(!Array.isArray(s))return;
+  s=s.filter(function(m){return m&&(m.role==='user'||m.role==='assistant')&&typeof m.content==='string'});
+  while(s.length&&s[0].role!=='user')s.shift();
+  if(!s.length)return;
+  history=s.map(function(m){return {role:m.role,content:m.content}});
+  log.innerHTML='';
+  history.forEach(function(m){
+    if(m.role==='user'){addUser(m.content.split('\n\nFile ')[0],[]);return}
+    if(/^\[I generated an image/.test(m.content)){add('g','🖼 Image (not saved)');return}
+    var d=add('g','');
+    if(/```|\*\*|^#{1,4}\s|^\s*[-*]\s/m.test(m.content))renderMd(d,m.content);else d.textContent=m.content;
+    addCopy(d,m.content);
+  });
+  log.scrollTop=log.scrollHeight;
+}
+function addCopy(d,txt){
+  var b=document.createElement('button');b.type='button';b.className='cp';b.textContent='Copy';
+  b.onclick=function(){copyText(txt,b)};
+  d.after(b);
+}
+async function say(r){
+  var d=add('g','');typeOut(d,r);history.push({role:'assistant',content:r});
+  setState('speaking','Speaking…');await speak(r);
+  busy=false;setState('','Tap the orb to speak');if(cfg.auto)setTimeout(listen,300);
+}
+
+/* reminders, timers and memory are handled on the device, no AI call needed */
+var NUMW={a:1,an:1,one:1,two:2,three:3,four:4,five:5,six:6,seven:7,eight:8,nine:9,ten:10,fifteen:15,twenty:20,thirty:30,forty:40,sixty:60,half:.5};
+var DUR=/\b(\d+(?:\.\d+)?|an?|one|two|three|four|five|six|seven|eight|nine|ten|fifteen|twenty|thirty|forty|sixty|half(?:\s+an?)?)\s*(seconds?|secs?|minutes?|mins?|hours?|hrs?)\b/i;
+function parseDur(q){
+  var m=q.match(DUR);if(!m)return null;
+  var w=m[1].toLowerCase().split(/\s+/)[0],n=/^\d/.test(w)?parseFloat(w):NUMW[w];
+  if(!n)return null;
+  var u=m[2][0].toLowerCase();
+  return {ms:Math.round(n*(u==='s'?1000:u==='m'?60000:3600000)),str:m[0]};
+}
+function parseClock(q){
+  var m=q.match(/\bat\s+(\d{1,2})(?::(\d{2}))?\s*(?:([ap])\.?m\b\.?)?/i);
+  if(!m)return null;
+  var h=parseInt(m[1],10),mi=m[2]?parseInt(m[2],10):0,ap=m[3]?m[3].toLowerCase():'';
+  if(h>24||mi>59)return null;
+  var now=new Date(),best=null,opts;
+  if(ap){opts=[h%12+(ap==='p'?12:0)]}else if(h<=12){opts=[h%12,h%12+12]}else opts=[h];
+  opts.forEach(function(H){var d=new Date();d.setHours(H,mi,0,0);if(d<=now)d.setDate(d.getDate()+1);if(!best||d<best)best=d});
+  return {at:best.getTime(),str:m[0]};
+}
+function fmtT(at){return new Date(at).toLocaleTimeString([], {hour:'numeric',minute:'2-digit'})}
+function cleanTxt(rest,str){
+  var esc=str.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+  var t=rest.replace(new RegExp('\\b(?:in|after)\\s+'+esc,'i'),' ');
+  if(t===rest)t=rest.replace(str,' ');
+  return t.replace(/\s+/g,' ').replace(/^\s*(to|about|that)\s+/i,'').replace(/\s+(to|about|that|at)\s*$/i,'').replace(/[.?!]+$/,'').trim();
+}
+function addRem(at,text,timer){
+  rems.push({id:String(Date.now())+Math.floor(Math.random()*1000),at:at,text:text,timer:!!timer});saveRem();
+  try{if('Notification' in window&&Notification.permission==='default')Notification.requestPermission()}catch(e){}
+}
+function localCmd(q){
+  var t=q.trim(),m,d,c;
+  if(!/\?\s*$/.test(t)&&(m=t.match(/^\s*(?:hey\s+)?(?:jarvis[,\s]+)?(?:please\s+)?remember\s+(?:that\s+)?(.{3,})$/i))){
+    var f=m[1].replace(/[.!]+$/,'').slice(0,300);cfg.mem=(cfg.mem||[]).concat([f]).slice(-30);save();
+    return 'Noted. I’ll remember that.';
+  }
+  if(/\bforget\s+(everything|all)\b|\b(clear|delete|wipe|reset)\s+(your\s+|my\s+)?(memory|memories)\b/i.test(t)){cfg.mem=[];save();return 'Memory cleared.'}
+  if(/\bwhat\b[^?]{0,20}\b(do you|did you|have you)\s+(remember|know about me)\b/i.test(t))
+    return cfg.mem&&cfg.mem.length?'I remember: '+cfg.mem.join('; ')+'.':'I haven’t been asked to remember anything yet.';
+  if(/\b(cancel|clear|delete|stop|remove)\b[^?]{0,25}\b(reminders?|timers?)\b/i.test(t)){var n=rems.length;rems=[];saveRem();return n?'Done. All reminders and timers are cancelled.':'You have nothing scheduled.'}
+  if(/\b(what|which|any|list|show|how many)\b[^?]{0,30}\b(reminders?|timers?)\b/i.test(t)&&!/\bremind me\b|\bset\b/i.test(t)){
+    if(!rems.length)return 'You have nothing scheduled.';
+    return rems.slice().sort(function(a,b){return a.at-b.at}).map(function(r){return (r.timer?'Timer':r.text)+' at '+fmtT(r.at)}).join('; ')+'.';
+  }
+  if(/\btimer\b/i.test(t)&&(d=parseDur(t))){addRem(Date.now()+d.ms,'',true);return 'Timer set for '+d.str+'. Keep Jarvis open so I can alert you.'}
+  if((m=t.match(/\bremind me\b([\s\S]*)/i))){
+    var rest=m[1];
+    if((d=parseDur(rest))){var tx=cleanTxt(rest,d.str);addRem(Date.now()+d.ms,tx||'your reminder');return 'Okay, I’ll remind you in '+d.str+(tx?' to '+tx:'')+'. Keep Jarvis open so I can alert you.'}
+    if((c=parseClock(rest))){var tc=cleanTxt(rest,c.str);addRem(c.at,tc||'your reminder');return 'Okay, I’ll remind you at '+fmtT(c.at)+(tc?' to '+tc:'')+'. Keep Jarvis open so I can alert you.'}
+    return 'When should I remind you? Try “remind me in 10 minutes to stretch”.';
+  }
+  return null;
+}
+function fire(r){
+  var late=Date.now()-r.at>90000;
+  var msg=r.timer?'Your timer is done.':(late?'Missed reminder: ':'Reminder: ')+r.text+'.';
+  add('g',msg);
+  try{if(navigator.vibrate)navigator.vibrate([250,120,250,120,250])}catch(e){}
+  try{
+    if('Notification' in window&&Notification.permission==='granted'){
+      var o={body:msg,icon:'icon-192.png',tag:'jarvis-'+r.id,vibrate:[200,100,200]};
+      if(navigator.serviceWorker&&navigator.serviceWorker.ready)navigator.serviceWorker.ready.then(function(reg){reg.showNotification('Jarvis',o)}).catch(function(){new Notification('Jarvis',o)});
+      else new Notification('Jarvis',o);
+    }
+  }catch(e){}
+  if(!busy&&!late&&cfg.voiceOn){stopWake();speak(msg).then(function(){if(!busy)setState('','Tap the orb to speak')})}
+}
+function tick(){
+  if(!rems.length)return;
+  var now=Date.now(),due=rems.filter(function(r){return r.at<=now});
+  if(!due.length)return;
+  rems=rems.filter(function(r){return r.at>now});saveRem();due.forEach(fire);
+}
+
+/* wake word: "Hey Jarvis" */
+function stopWake(){var w=wrec;wrec=null;if(w){w.onend=null;w.onresult=null;w.onerror=null;try{w.abort()}catch(e){}}}
+function startWake(){
+  if(!cfg.wake||!SR||wrec||rec||busy||cfg.auto||blocked||wakeBlocked||document.hidden||$('settings').classList.contains('open'))return;
+  var w=new SR();wrec=w;w.lang=cfg.lang;w.continuous=true;w.interimResults=true;
+  w.onresult=function(ev){
+    for(var i=ev.resultIndex;i<ev.results.length;i++){
+      if(!ev.results[i].isFinal)continue;
+      var m=ev.results[i][0].transcript.match(/\bjarvis\b[\s,.!?]*([\s\S]*)$/i);
+      if(!m)continue;
+      var rest=m[1].trim();
+      stopWake();
+      if(rest.length>2)ask(rest);else setTimeout(listen,200);
+      return;
+    }
+  };
+  w.onerror=function(ev){if(ev.error==='not-allowed'||ev.error==='service-not-allowed'){wakeBlocked=true;st.textContent='Wake word needs microphone access.'}};
+  w.onend=function(){if(wrec===w){wrec=null;setTimeout(startWake,500)}};
+  try{w.start()}catch(e){wrec=null}
+}
+
+/* install button */
+function instUi(){
+  var b=$('inst'),n=$('instn');if(!b)return;
+  var standalone=(window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches)||navigator.standalone;
+  var ios=/iphone|ipad|ipod/i.test(navigator.userAgent);
+  b.style.display=deferred&&!standalone?'':'none';
+  n.textContent=standalone?'Installed ✓ Running as an app.':deferred?'Install Jarvis to your home screen for a full-screen app.':ios?'On iPhone: tap Share, then “Add to Home Screen”.':'Use your browser menu and choose “Install app” or “Add to Home screen”.';
+}
+window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();deferred=e;instUi()});
+window.addEventListener('appinstalled',function(){deferred=null;instUi()});
+$('inst').onclick=async function(){if(!deferred)return;deferred.prompt();try{await deferred.userChoice}catch(e){}deferred=null;instUi()};
+$('stopb').onclick=function(){if(window.speechSynthesis)speechSynthesis.cancel()};
+$('newc').onclick=function(){if(busy)return;if(window.speechSynthesis)speechSynthesis.cancel();history=[];saveChat();empty()};
+$('memBox').oninput=function(){cfg.mem=this.value.split('\n').map(function(x){return x.trim()}).filter(Boolean).slice(0,30);save()};
+
 /* ---------- settings ---------- */
 function openSet(){
   syncK();
-  $('cw').style.display=cfg.persona==='custom'?'flex':'none';$('kmsg').textContent='';fillVoices();applyTheme();
+  $('cw').style.display=cfg.persona==='custom'?'flex':'none';$('kmsg').textContent='';fillVoices();applyTheme();$('memBox').value=(cfg.mem||[]).join('\n');instUi();
   $('settings').classList.add('open');
 }
 function closeSet(){$('settings').classList.remove('open');pill();if(!history.length)empty()}
@@ -649,6 +825,8 @@ document.querySelectorAll('[data-k]').forEach(function(el){
     if(k==='key')v=v.trim();cfg[k]=v;save();if(el.type==='checkbox')syncK();
     if(k==='persona')$('cw').style.display=v==='custom'?'flex':'none';
     if(k==='theme'||k==='anim')applyTheme();if(k==='auto')liveUi();pill();hud();
+    if(k==='saveChat'){if(v)saveChat();else{try{localStorage.removeItem('jarvis_chat')}catch(e){}}}
+    if(k==='wake'){if(v){blocked=false;wakeBlocked=false;startWake()}else stopWake();if(!busy&&!rec)setState('','Tap the orb to speak')}
     if(k==='weather'||k==='city'||k==='units'){if(k==='weather')cfg.lat=null;wx=null;wxAt=0;save();clearTimeout(wt);wt=setTimeout(function(){if(cfg.weather)getWx(true).then(hud)},k==='city'?900:50)}
   });
 });
@@ -659,14 +837,18 @@ $('test').onclick=async function(){
   catch(e){m.style.color='#e5484d';m.textContent=errText(e)}
 };
 $('tv').onclick=function(){speak('Hello'+(cfg.name?', '+cfg.name:'')+'. This is how I sound.')};
-$('clr').onclick=function(){history=[];empty();closeSet()};
-$('rst').onclick=function(){if(confirm('Reset all settings, including your API key?')){cfg=Object.assign({},D);try{localStorage.removeItem('jarvis_cfg');localStorage.removeItem('jarvis_key')}catch(e){}history=[];applyTheme();pill();empty();openSet()}};
+$('clr').onclick=function(){history=[];saveChat();empty();closeSet()};
+$('rst').onclick=function(){if(confirm('Reset all settings, including your API key?')){cfg=Object.assign({},D);try{localStorage.removeItem('jarvis_cfg');localStorage.removeItem('jarvis_key');localStorage.removeItem('jarvis_chat');localStorage.removeItem('jarvis_rem')}catch(e){}rems=[];stopWake();history=[];applyTheme();pill();empty();openSet()}};
 $('gear').onclick=openSet;$('back').onclick=closeSet;$('done').onclick=closeSet;
 
 orb.onclick=function(){blocked=false;try{if(cfg.anim!=='off'&&navigator.vibrate)navigator.vibrate(12)}catch(e){}if(window.speechSynthesis&&speechSynthesis.speaking){speechSynthesis.cancel();return}listen()};
 $('f').onsubmit=function(e){e.preventDefault();var v=$('t').value;$('t').value='';ask(v)};
 if(window.speechSynthesis){speechSynthesis.onvoiceschanged=fillVoices;speechSynthesis.getVoices()}
-applyTheme();pill();empty();liveUi();hud();setInterval(hud,15000);
+applyTheme();pill();empty();restoreChat();liveUi();hud();setInterval(hud,15000);
+setInterval(saveChat,3000);setInterval(tick,1000);
+document.addEventListener('visibilitychange',function(){saveChat();if(!document.hidden){tick();startWake()}else stopWake()});
+window.addEventListener('pagehide',saveChat);
+instUi();startWake();
 if(cfg.weather&&(cfg.lat!=null||cfg.city.trim()))getWx().then(hud);
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(function(){});
 })();
