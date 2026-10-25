@@ -211,26 +211,73 @@ html[data-theme="hud"] #tour .panel{border-radius:10px 10px 0 0}
 .dots i.on{width:22px;background:linear-gradient(90deg,var(--a),var(--b));box-shadow:0 0 10px var(--glow)}
 .lnk{background:none;border:0;padding:0;color:var(--a);font-weight:600;font-size:13px;text-decoration:underline}
 #tback:disabled{opacity:.35}
+
+/* ---------- bigger screens ---------- */
+.side,.comp{display:contents}
+.keys{display:none}
+#drop{display:none;position:fixed;inset:14px;z-index:40;place-items:center;border:2px dashed var(--a);border-radius:24px;background:rgba(0,0,0,.6);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);font:700 22px system-ui,sans-serif;letter-spacing:.04em;color:var(--fg);pointer-events:none;box-shadow:0 0 40px var(--glow)}
+#drop.on{display:grid}
+@media (min-width:640px){
+  #app{max-width:720px}
+  .sbar,.sbody{max-width:720px}
+  #log{scrollbar-width:thin;scrollbar-color:var(--line) transparent}
+  #log::-webkit-scrollbar{display:block;width:8px}
+  #log::-webkit-scrollbar-thumb{background:var(--line);border-radius:8px}
+  #sheet,#tour{align-items:center}
+  #sheet .panel,#tour .panel{max-width:520px;border-bottom:1px solid var(--line);border-radius:20px;padding-bottom:18px;transform:translateY(24px) scale(.97);opacity:0;transition:transform .3s cubic-bezier(.2,.9,.3,1),opacity .25s}
+  #sheet.open .panel,#tour.open .panel{transform:none;opacity:1}
+  html[data-theme="hud"] #sheet .panel,html[data-theme="hud"] #tour .panel{border-radius:10px}
+  #sheet .grab,#tour .grab{display:none}
+}
+@media (min-width:980px) and (min-height:560px){
+  #app{max-width:1280px;display:grid;grid-template-columns:minmax(320px,400px) minmax(0,1fr);grid-template-rows:auto auto minmax(0,1fr) auto;grid-template-areas:"head head" "side hud" "side log" "side comp";column-gap:28px;padding:18px 36px 24px}
+  header{grid-area:head;padding:4px 0 16px}
+  #hud{grid-area:hud;text-align:left;padding:0 6px 8px}
+  .stage{display:contents}
+  .side{grid-area:side;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:28px 22px;border:1px solid var(--line);background:var(--card);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-radius:var(--r);min-height:0;overflow:hidden}
+  .comp{grid-area:comp;display:flex;flex-direction:column;gap:6px;min-width:0}
+  #log{grid-area:log;min-height:0;padding:8px 10px 14px;gap:14px}
+  .m{max-width:78%;font-size:16px}
+  form{margin-top:8px}
+  input[type=text]{padding:15px 18px}
+  .send{width:58px}
+  #orb{width:210px;height:210px}
+  #orb .core{inset:42px}#orb .r1{inset:12px}#orb .r3{inset:26px}
+  #orb::before,#orb::after{inset:30px}
+  #orb:hover .core{transform:scale(1.05)}
+  #status{font-size:12.5px;max-width:100%;white-space:normal;line-height:1.4}
+  .keys{display:grid;grid-template-columns:auto 1fr;gap:7px 12px;margin-top:22px;align-self:stretch;align-items:center;font:500 11.5px ui-monospace,Menlo,Consolas,monospace;color:var(--mute)}
+  .keys kbd{font:inherit;border:1px solid var(--line);border-bottom-width:2px;border-radius:6px;padding:2px 8px;background:var(--bg2);color:var(--fg);justify-self:start}
+  .sbar,.sbody{max-width:1040px}
+  .sbody{display:block;column-count:2;column-gap:18px}
+  .sbody>*{break-inside:avoid;margin:0 0 18px}
+}
 </style>
 </head>
 <body>
 <div id="app">
   <header>
     <div class="brand"><div class="logo"></div><h1>JARVIS</h1><span class="pill" id="pill"><i></i><em id="pt" style="font-style:normal">No key</em></span></div>
-    <div style="display:flex;gap:8px"><button class="icn" id="newc" aria-label="New chat">✎</button><button class="icn" id="gear" aria-label="Settings">⚙︎</button></div>
+    <div style="display:flex;gap:8px"><button class="icn" id="newc" aria-label="New chat" title="New chat (Ctrl+K)">✎</button><button class="icn" id="gear" aria-label="Settings" title="Settings (Ctrl+,)">⚙︎</button></div>
   </header>
   <div id="hud"></div>
   <div id="log"></div>
   <div class="stage">
+    <div class="side">
     <div id="status">Tap the orb to speak</div>
     <div class="wave" id="wave"><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b></div>
-    <button id="orb" aria-label="Talk"><span class="r1"></span><span class="r3"></span><span class="r2"></span><span class="core"></span></button>
+    <button id="orb" aria-label="Talk" title="Talk (Space)"><span class="r1"></span><span class="r3"></span><span class="r2"></span><span class="core"></span></button>
     <button class="live" id="live"></button>
     <button class="live on" id="stopb" style="display:none">■ Stop speaking</button>
+    <div class="keys" aria-hidden="true"><kbd>Space</kbd><span>Talk</span><kbd>/</kbd><span>Type a message</span><kbd>Esc</kbd><span>Stop or close</span><kbd>Ctrl+K</kbd><span>New chat</span><kbd>Ctrl+,</kbd><span>Settings</span></div>
+    </div>
+    <div class="comp">
     <div id="att"></div>
     <form id="f"><button type="button" class="plus" id="plus" aria-label="Add to chat">+</button><input type="text" id="t" placeholder="Message Jarvis…" autocomplete="off"><button class="send" type="submit" aria-label="Send">➤</button></form>
+    </div>
   </div>
 </div>
+<div id="drop">Drop files to attach</div>
 
 <input type="file" id="fcam" accept="image/*" capture="environment" hidden>
 <input type="file" id="fpho" accept="image/*" multiple hidden>
@@ -357,8 +404,9 @@ function applyTheme(){
   document.querySelectorAll('#acc .dot').forEach(function(d){d.classList.toggle('sel',d.dataset.ac===cfg.accent)});
 }
 function pill(){var ok=!!cfg.key.trim();$('pill').className='pill'+(ok?' ok':'');$('pt').textContent=ok?'Ready':'No key'}
+function isDesk(){return !!(window.matchMedia&&window.matchMedia('(min-width:980px) and (min-height:560px) and (hover:hover)').matches)}
 function setState(s,t){
-  if(s===''&&cfg.wake&&SR&&t==='Tap the orb to speak')t='Say “Hey Jarvis” or tap the orb';
+  if(s===''&&t==='Tap the orb to speak'){var dk=isDesk();t=cfg.wake&&SR?(dk?'Say “Hey Jarvis” or click the orb':'Say “Hey Jarvis” or tap the orb'):(dk?'Click the orb or press Space':t)}
   orb.className=s;document.body.dataset.s=s;st.textContent=t;
   var sb=$('stopb');if(sb)sb.style.display=s==='speaking'?'':'none';
   if(s==='')setTimeout(startWake,700);
@@ -912,6 +960,46 @@ document.addEventListener('visibilitychange',function(){saveChat();if(!document.
 window.addEventListener('pagehide',saveChat);
 instUi();startWake();
 if(cfg.weather&&(cfg.lat!=null||cfg.city.trim()))getWx().then(hud);
+/* ---------- desktop: shortcuts, paste, drag and drop ---------- */
+(function(){
+  var tin=$('t'),dz=$('drop'),mac=/Mac|iPhone|iPad/i.test(navigator.platform||navigator.userAgent);
+  if(mac)Array.prototype.forEach.call(document.querySelectorAll('.keys kbd'),function(k){k.textContent=k.textContent.replace('Ctrl','⌘')});
+  function setOpen(){return $('settings').classList.contains('open')}
+  function modalOpen(){return setOpen()||sh.classList.contains('open')||tr.classList.contains('open')}
+  function typing(el){return !!el&&(el.tagName==='INPUT'||el.tagName==='TEXTAREA'||el.tagName==='SELECT'||el.isContentEditable)}
+  document.addEventListener('keydown',function(e){
+    var mod=e.ctrlKey||e.metaKey;
+    if(e.key==='Escape'){
+      if(tr.classList.contains('open')){closeTour();return}
+      if(sh.classList.contains('open')){closeSheet();return}
+      if(setOpen()){closeSet();if(isDesk())tin.focus();return}
+      if(window.speechSynthesis&&speechSynthesis.speaking){speechSynthesis.cancel();return}
+      if(rec){orb.click();return}
+      if(typing(e.target)&&e.target!==tin)e.target.blur();
+      return;
+    }
+    if(mod&&!e.shiftKey&&!e.altKey&&(e.key==='k'||e.key==='K')){e.preventDefault();if(!busy&&!modalOpen())$('newc').click();return}
+    if(mod&&e.key===','){e.preventDefault();if(setOpen())closeSet();else openSet();return}
+    if(mod||e.altKey||modalOpen()||typing(e.target))return;
+    if(e.key==='/'){e.preventDefault();tin.focus();return}
+    if(e.code==='Space'&&e.target===document.body){e.preventDefault();orb.click();return}
+    if(e.key.length===1&&e.target===document.body)tin.focus();
+  });
+  document.addEventListener('paste',function(e){
+    var cf=e.clipboardData&&e.clipboardData.files;
+    if(cf&&cf.length&&!setOpen()){e.preventDefault();addFiles(Array.from(cf))}
+  });
+  var dc=0;
+  function hasFiles(e){return !!(e.dataTransfer&&Array.prototype.indexOf.call(e.dataTransfer.types||[],'Files')>-1)}
+  window.addEventListener('dragenter',function(e){if(!hasFiles(e))return;e.preventDefault();dc++;if(!setOpen())dz.classList.add('on')});
+  window.addEventListener('dragover',function(e){if(hasFiles(e))e.preventDefault()});
+  window.addEventListener('dragleave',function(e){if(!hasFiles(e))return;dc=Math.max(0,dc-1);if(!dc)dz.classList.remove('on')});
+  window.addEventListener('drop',function(e){
+    if(!hasFiles(e))return;e.preventDefault();dc=0;dz.classList.remove('on');
+    if(!setOpen())addFiles(Array.from(e.dataTransfer.files));
+  });
+  if(isDesk()){setState('','Tap the orb to speak');tin.focus()}
+})();
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(function(){});
 })();
 </script>
