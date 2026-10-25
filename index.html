@@ -192,6 +192,25 @@ html[data-theme="hud"] .plus,html[data-theme="hud"] .tile,html[data-theme="hud"]
 html[data-theme="hud"] #sheet .panel{border-radius:10px 10px 0 0}
 .cp{align-self:flex-start;margin:-4px 0 0 6px;background:none;border:0;color:var(--mute);font:600 10.5px ui-monospace,Menlo,Consolas,monospace;letter-spacing:.12em;text-transform:uppercase;padding:2px 6px}
 .cp:active{color:var(--a)}
+#tour{position:fixed;inset:0;z-index:30;display:flex;align-items:flex-end;justify-content:center;visibility:hidden;transition:visibility 0s .38s}
+#tour.open{visibility:visible;transition:none}
+#tour .scrim{position:absolute;inset:0;background:rgba(0,0,0,.66);opacity:0;transition:opacity .3s}
+#tour.open .scrim{opacity:1}
+#tour .panel{position:relative;width:100%;max-width:560px;background:var(--bg2);border:1px solid var(--line);border-bottom:0;border-radius:18px 18px 0 0;padding:10px 16px calc(18px + env(safe-area-inset-bottom,0px));transform:translateY(100%);transition:transform .38s cubic-bezier(.2,.9,.3,1);max-height:92vh;overflow-y:auto}
+#tour.open .panel{transform:none}
+html[data-theme="hud"] #tour .panel{border-radius:10px 10px 0 0}
+#tslides{min-height:250px;touch-action:pan-y}
+.tslide{animation:pop .4s cubic-bezier(.2,.9,.3,1.1)}
+.tn{font:700 12px ui-monospace,Menlo,Consolas,monospace;letter-spacing:.2em;color:var(--b);margin-bottom:6px}
+.tt{margin:0 0 8px;font-size:25px;font-weight:700;letter-spacing:-.01em;background:linear-gradient(90deg,var(--fg),var(--a),var(--b));-webkit-background-clip:text;background-clip:text;color:transparent}
+.td{margin:0 0 14px;font-size:15px;line-height:1.55;color:var(--fg);opacity:.9}
+.tex{display:flex;flex-wrap:wrap;gap:8px}
+.tex span{font:600 12px ui-monospace,Menlo,Consolas,monospace;border:1px solid var(--line);background:var(--card);border-left:2px solid var(--a);border-radius:4px;padding:7px 10px;color:var(--fg)}
+.dots{display:flex;justify-content:center;gap:7px;margin:14px 0}
+.dots i{width:7px;height:7px;border-radius:99px;background:var(--line);transition:all .3s}
+.dots i.on{width:22px;background:linear-gradient(90deg,var(--a),var(--b));box-shadow:0 0 10px var(--glow)}
+.lnk{background:none;border:0;padding:0;color:var(--a);font-weight:600;font-size:13px;text-decoration:underline}
+#tback:disabled{opacity:.35}
 </style>
 </head>
 <body>
@@ -216,6 +235,16 @@ html[data-theme="hud"] #sheet .panel{border-radius:10px 10px 0 0}
 <input type="file" id="fcam" accept="image/*" capture="environment" hidden>
 <input type="file" id="fpho" accept="image/*" multiple hidden>
 <input type="file" id="ffil" multiple hidden accept=".txt,.md,.json,.csv,.js,.jsx,.ts,.tsx,.py,.html,.css,.java,.kt,.c,.h,.cpp,.cs,.go,.rs,.php,.rb,.swift,.sql,.sh,.xml,.yml,.yaml,.toml,.ini,.log,.pdf,text/*,application/pdf">
+<div id="tour" aria-hidden="true"><div class="scrim"></div>
+  <div class="panel">
+    <div class="grab"></div>
+    <div class="sh-h"><button class="icn" id="tx" aria-label="Close">✕</button><h2>Quick tutorial</h2><button class="lnk" id="tskip" style="margin-left:auto">Skip</button></div>
+    <div id="tslides"></div>
+    <div class="dots" id="tdots"></div>
+    <div class="btns"><button class="btn" id="tback">Back</button><button class="btn p" id="tnext">Next</button></div>
+  </div>
+</div>
+
 <div id="sheet" aria-hidden="true"><div class="scrim"></div>
   <div class="panel">
     <div class="grab"></div>
@@ -299,7 +328,7 @@ html[data-theme="hud"] #sheet .panel{border-radius:10px 10px 0 0}
     </div>
 
     <div class="card"><h3>App</h3>
-      <div class="btns"><button class="btn" id="inst" style="display:none">Install app</button></div>
+      <div class="btns"><button class="btn" id="tourbtn">Quick tutorial</button><button class="btn" id="inst" style="display:none">Install app</button></div>
       <p class="note" id="instn"></p>
     </div>
 
@@ -342,6 +371,7 @@ function empty(){
   if(cfg.key.trim()){var c=document.createElement('div');c.className='chips';
     ['What’s the weather?','Draw a neon futuristic city','What time is it?','Tell me a fun fact','Remind me in 5 minutes to stretch'].forEach(function(t){var b=document.createElement('button');b.className='chip';b.textContent=t;b.onclick=function(){ask(t)};c.appendChild(b)});e.appendChild(c)}
   else{var b=document.createElement('button');b.className='cta';b.textContent='Open settings';b.onclick=openSet;e.appendChild(b)}
+  var tl=document.createElement('button');tl.className='lnk';tl.style.cssText='display:block;margin:16px auto 0';tl.textContent='Take the quick tutorial';tl.onclick=openTour;e.appendChild(tl);
   log.appendChild(e);
 }
 function add(role,text){var e=log.querySelector('.empty');if(e)e.remove();
@@ -812,6 +842,37 @@ $('newc').onclick=function(){if(busy)return;if(window.speechSynthesis)speechSynt
 $('memBox').oninput=function(){cfg.mem=this.value.split('\n').map(function(x){return x.trim()}).filter(Boolean).slice(0,30);save()};
 
 /* ---------- settings ---------- */
+/* ---------- quick tutorial ---------- */
+var TOUR=[
+ {n:'01',t:'Talk to Jarvis',d:'Tap the glowing orb and speak. Tap it again while Jarvis is talking to stop him. You can also type in the box at the bottom.',ex:['What’s the weather?','Tell me a fun fact']},
+ {n:'02',t:'Go hands-free',d:'Turn on Live chat and Jarvis listens again after every reply. In Settings, under Voice, you can also switch on the wake word and just say “Hey Jarvis”.',ex:['Hey Jarvis','Live chat on']},
+ {n:'03',t:'Add to chat (+)',d:'Tap + to take a photo, pick a picture, or attach a PDF or code file, then ask about it. Turn on Pro code mode for long, complete code with a Copy button.',ex:['Explain this photo','Fix the bug in this file']},
+ {n:'04',t:'Create and explore',d:'Say “draw” to make an image. Turn on Live weather in the + menu for local weather and time. Video isn’t available yet.',ex:['Draw a neon city','What time is it?']},
+ {n:'05',t:'Memory and reminders',d:'Jarvis remembers facts and sets reminders and timers. Keep the app open so alerts can reach you.',ex:['Remember that I like jazz','Remind me in 10 minutes to stretch','Set a timer for 5 minutes','Forget everything']},
+ {n:'06',t:'Make it yours',d:'Open ⚙ to change personality, voice, theme and colors. Tap ✎ for a new chat. You can install Jarvis from Settings to open it like a real app.',ex:['⚙ Settings','✎ New chat']}
+];
+var tr=document.getElementById('tour'),ti=0;
+function tourShow(i){
+  ti=Math.max(0,Math.min(TOUR.length-1,i));var s=TOUR[ti],box=$('tslides');box.innerHTML='';
+  var d=document.createElement('div');d.className='tslide';
+  d.innerHTML='<div class="tn">'+s.n+' / 0'+TOUR.length+'</div><h3 class="tt">'+s.t+'</h3><p class="td">'+s.d+'</p>';
+  var ex=document.createElement('div');ex.className='tex';
+  s.ex.forEach(function(x){var c=document.createElement('span');c.textContent=x;ex.appendChild(c)});
+  d.appendChild(ex);box.appendChild(d);
+  var dt=$('tdots');dt.innerHTML='';TOUR.forEach(function(_,k){var e=document.createElement('i');if(k===ti)e.className='on';dt.appendChild(e)});
+  $('tback').disabled=ti===0;$('tnext').textContent=ti===TOUR.length-1?'Get started':'Next';
+}
+function openTour(){tourShow(0);tr.classList.add('open')}
+function closeTour(){tr.classList.remove('open')}
+$('tnext').onclick=function(){if(ti>=TOUR.length-1)closeTour();else tourShow(ti+1)};
+$('tback').onclick=function(){tourShow(ti-1)};
+$('tx').onclick=closeTour;$('tskip').onclick=closeTour;tr.querySelector('.scrim').onclick=closeTour;
+$('tourbtn').onclick=openTour;
+(function(){var x0=null;var b=$('tslides');
+  b.addEventListener('touchstart',function(e){x0=e.touches[0].clientX},{passive:true});
+  b.addEventListener('touchend',function(e){if(x0==null)return;var dx=e.changedTouches[0].clientX-x0;x0=null;if(dx<-50)$('tnext').onclick();else if(dx>50&&ti>0)tourShow(ti-1)},{passive:true});
+})();
+
 function openSet(){
   syncK();
   $('cw').style.display=cfg.persona==='custom'?'flex':'none';$('kmsg').textContent='';fillVoices();applyTheme();$('memBox').value=(cfg.mem||[]).join('\n');instUi();
@@ -844,7 +905,8 @@ $('gear').onclick=openSet;$('back').onclick=closeSet;$('done').onclick=closeSet;
 orb.onclick=function(){blocked=false;try{if(cfg.anim!=='off'&&navigator.vibrate)navigator.vibrate(12)}catch(e){}if(window.speechSynthesis&&speechSynthesis.speaking){speechSynthesis.cancel();return}listen()};
 $('f').onsubmit=function(e){e.preventDefault();var v=$('t').value;$('t').value='';ask(v)};
 if(window.speechSynthesis){speechSynthesis.onvoiceschanged=fillVoices;speechSynthesis.getVoices()}
-applyTheme();pill();empty();restoreChat();liveUi();hud();setInterval(hud,15000);
+applyTheme();pill();empty();restoreChat();if(!cfg.toured){cfg.toured=true;save();setTimeout(openTour,900)}
+liveUi();hud();setInterval(hud,15000);
 setInterval(saveChat,3000);setInterval(tick,1000);
 document.addEventListener('visibilitychange',function(){saveChat();if(!document.hidden){tick();startWake()}else stopWake()});
 window.addEventListener('pagehide',saveChat);
