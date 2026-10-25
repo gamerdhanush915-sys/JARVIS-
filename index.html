@@ -241,17 +241,32 @@ html[data-theme="hud"] #tour .panel{border-radius:10px 10px 0 0}
   form{margin-top:8px}
   input[type=text]{padding:15px 18px}
   .send{width:58px}
-  #orb{width:210px;height:210px}
-  #orb .core{inset:42px}#orb .r1{inset:12px}#orb .r3{inset:26px}
-  #orb::before,#orb::after{inset:30px}
+  #orb{width:clamp(130px,27vh,210px);height:clamp(130px,27vh,210px)}
+  #orb .core{inset:20%}#orb .r1{inset:6%}#orb .r3{inset:12%}
+  #orb::before,#orb::after{inset:14%}
   #orb:hover .core{transform:scale(1.05)}
   #status{font-size:12.5px;max-width:100%;white-space:normal;line-height:1.4}
   .keys{display:grid;grid-template-columns:auto 1fr;gap:7px 12px;margin-top:22px;align-self:stretch;align-items:center;font:500 11.5px ui-monospace,Menlo,Consolas,monospace;color:var(--mute)}
   .keys kbd{font:inherit;border:1px solid var(--line);border-bottom-width:2px;border-radius:6px;padding:2px 8px;background:var(--bg2);color:var(--fg);justify-self:start}
   .sbar,.sbody{max-width:1040px}
-  .sbody{display:block;column-count:2;column-gap:18px}
-  .sbody>*{break-inside:avoid;margin:0 0 18px}
+  .sbody{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;align-items:start;align-content:start}
+  .sbody>*{margin:0;min-width:0}
 }
+
+/* ---------- smoothness ---------- */
+*{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+#orb,.side>*{flex:none}
+#log{scroll-behavior:auto}
+.wave b{height:22px;transform:scaleY(.23);transform-origin:center;will-change:transform}
+@keyframes eq{0%,100%{transform:scaleY(.23)}50%{transform:scaleY(1)}}
+@keyframes breathe{0%,100%{transform:scale(.94);opacity:.85}50%{transform:scale(1.04);opacity:1}}
+#orb .r2{filter:none}
+#orb .core,#orb .r1,#orb .r2,#orb .r3,body::before,.logo{will-change:transform}
+html[data-anim="reduced"] #log,html[data-anim="off"] #log{-webkit-mask-image:none;mask-image:none}
+html[data-anim="reduced"] #orb .r2{animation-duration:9s}
+html[data-anim="reduced"] #orb.speaking .r2,html[data-anim="reduced"] #orb.thinking .r2{animation-duration:4s}
+@media (min-width:980px){#log{-webkit-mask-image:none;mask-image:none}}
+@media (min-width:980px) and (max-height:760px){.keys{display:none}}
 </style>
 </head>
 <body>
@@ -375,8 +390,9 @@ html[data-theme="hud"] #tour .panel{border-radius:10px 10px 0 0}
     </div>
 
     <div class="card"><h3>App</h3>
-      <div class="btns"><button class="btn" id="tourbtn">Quick tutorial</button><button class="btn" id="inst" style="display:none">Install app</button></div>
+      <div class="btns"><button class="btn" id="tourbtn">Quick tutorial</button><button class="btn" id="upd">Update app</button><button class="btn" id="inst" style="display:none">Install app</button></div>
       <p class="note" id="instn"></p>
+      <p class="note">Version 21 · “Update app” clears the saved copy and reloads the newest files.</p>
     </div>
 
     <div class="card"><h3>Data</h3>
@@ -885,6 +901,14 @@ function instUi(){
 window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();deferred=e;instUi()});
 window.addEventListener('appinstalled',function(){deferred=null;instUi()});
 $('inst').onclick=async function(){if(!deferred)return;deferred.prompt();try{await deferred.userChoice}catch(e){}deferred=null;instUi()};
+$('upd').onclick=async function(){
+  toast('Updating…');
+  try{
+    if(navigator.serviceWorker){var rs=await navigator.serviceWorker.getRegistrations();for(var i=0;i<rs.length;i++)await rs[i].unregister()}
+    if(window.caches){var ks=await caches.keys();for(var j=0;j<ks.length;j++)await caches.delete(ks[j])}
+  }catch(e){}
+  location.href=location.pathname+'?v='+Date.now();
+};
 $('stopb').onclick=function(){if(window.speechSynthesis)speechSynthesis.cancel()};
 $('newc').onclick=function(){if(busy)return;if(window.speechSynthesis)speechSynthesis.cancel();history=[];saveChat();empty()};
 $('memBox').oninput=function(){cfg.mem=this.value.split('\n').map(function(x){return x.trim()}).filter(Boolean).slice(0,30);save()};
@@ -999,6 +1023,25 @@ if(cfg.weather&&(cfg.lat!=null||cfg.city.trim()))getWx().then(hud);
     if(!setOpen())addFiles(Array.from(e.dataTransfer.files));
   });
   if(isDesk()){setState('','Tap the orb to speak');tin.focus()}
+})();
+/* ---------- auto smooth mode on slow computers ---------- */
+(function(){
+  try{if(cfg.anim!=='full'||localStorage.getItem('jarvis_perf'))return}catch(e){return}
+  setTimeout(function(){
+    if(document.hidden)return;
+    var last=0,fr=[];
+    function f(t){
+      if(document.hidden)return;
+      if(last)fr.push(t-last);last=t;
+      if(fr.length<90)requestAnimationFrame(f);else done();
+    }
+    function done(){
+      var avg=fr.reduce(function(a,b){return a+b},0)/fr.length;
+      try{localStorage.setItem('jarvis_perf','1')}catch(e){}
+      if(avg>28){cfg.anim='reduced';save();applyTheme();toast('Smooth mode turned on for this device')}
+    }
+    requestAnimationFrame(f);
+  },2500);
 })();
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(function(){});
 })();
