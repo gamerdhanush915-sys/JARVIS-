@@ -236,7 +236,7 @@ html[data-theme="hud"] #sheet .panel{border-radius:10px 10px 0 0}
   <div class="sbar"><button class="icn" id="back" aria-label="Back">←</button><h2>Settings</h2></div>
   <div class="sbody">
     <div class="card"><h3>AI connection</h3>
-      <label>Gemini API key<input type="password" id="key" data-k="key" placeholder="AIza…" autocomplete="off"><small>Free from aistudio.google.com. Saved only on this device.</small></label>
+      <label>API key<input type="password" id="key" data-k="key" placeholder="Paste your API key" autocomplete="off"><small>Saved only on this device.</small></label>
       <div class="btns"><button class="btn" id="test">Test connection</button></div>
       <div id="kmsg"></div>
     </div>
@@ -291,7 +291,7 @@ html[data-theme="hud"] #sheet .panel{border-radius:10px 10px 0 0}
 
     <div class="card"><h3>Data</h3>
       <div class="btns"><button class="btn" id="clr">Clear chat</button><button class="btn d" id="rst">Reset all</button></div>
-      <p class="note">Chats stay in this tab only and aren’t saved. Free Gemini usage may be used by Google to improve its products, so avoid sharing private information.</p>
+      <p class="note">Chats stay in this tab only and aren’t saved. Free-tier usage may be used by the AI provider to improve its products, so avoid sharing private information.</p>
     </div>
     <button class="btn p" id="done" style="flex:none">Done</button>
   </div>
@@ -374,7 +374,7 @@ function sysPrompt(ctx,code){
   var P={butler:'a calm, witty, helpful butler-style AI assistant',friendly:'a warm, upbeat and friendly AI assistant',concise:'a direct, efficient AI assistant who skips small talk',custom:cfg.custom||'a helpful AI assistant'};
   var L={short:'Keep replies to 1–2 short sentences.',normal:'Keep replies to 1–3 short sentences unless asked for detail.',detailed:'Give clear, thorough answers, up to two short paragraphs.'};
   var rules=code?' You are also an expert senior software engineer. For coding requests write complete, correct, runnable code in fenced code blocks with a language tag. Keep explanations brief and outside the code, say how to run it, handle errors and edge cases, and follow modern best practices. Never read code aloud. Code answers may be as long as needed.':' Your replies are spoken aloud, so write plain conversational text with no markdown, lists or emoji. '+L[cfg.length]+' If the user asks for code, put it in fenced code blocks with a language tag.';
-  return 'You are Jarvis, '+P[cfg.persona]+'. You were created by Dhanush. If asked who created, made, built or developed you, answer that Dhanush created you. If asked what technology powers you, say you run on Google’s Gemini.'+rules+(cfg.name?' The user’s name is '+cfg.name+'.':'')+' Reply in the language the user writes in.'+ctx+' You have no other live data such as news; say so briefly if asked.';
+  return 'You are Jarvis, '+P[cfg.persona]+'. You were created by Dhanush. If asked who created, made, built or developed you, answer that Dhanush created you. If asked which AI or technology you run on, say you are running on Jarvis AI technology. If asked directly whether you are a specific model such as Gemini, ChatGPT or Claude, say you are Jarvis and you can’t share details of the underlying model; never claim to be human.'+rules+(cfg.name?' The user’s name is '+cfg.name+'.':'')+' Reply in the language the user writes in.'+ctx+' You have no other live data such as news; say so briefly if asked.';
 }
 async function gemini(msgs,system,maxTok,o){
   o=o||{};
@@ -405,9 +405,9 @@ async function gemini(msgs,system,maxTok,o){
 function errText(e){
   if(e.message==='nokey')return 'Please add your API key in settings first.';
   var d=e.status?' ['+e.status+(e.detail?': '+e.detail.slice(0,140):'')+']':' ['+(e.message||'network')+']';
-  if(e.status===400||e.status===401||e.status===403)return 'Google rejected the request. Check your API key in settings.'+d;
+  if(e.status===400||e.status===401||e.status===403)return 'The AI service rejected the request. Check your API key in settings.'+d;
   if(e.status===429)return 'I’ve hit the free usage limit. Try again in a minute.'+d;
-  return 'I couldn’t reach Google right now.'+d;
+  return 'I couldn’t reach the AI service right now.'+d;
 }
 async function ask(q){
   var files=atts.slice();
@@ -419,6 +419,7 @@ async function ask(q){
   var entry={role:'user',content:content,files:files.filter(function(f){return f.data}).map(function(f){return {mime:f.mime,data:f.data}})};
   history.push(entry);
   if(!files.length&&MADE.test(q)){var mr='Dhanush created me.';var md=add('g','');typeOut(md,mr);history.push({role:'assistant',content:mr});setState('speaking','Speaking…');await speak(mr);busy=false;setState('','Tap the orb to speak');if(cfg.auto)setTimeout(listen,300);return}
+  if(!files.length&&TECH.test(q)){var tr='I am running on Jarvis AI technology.';var td=add('g','');typeOut(td,tr);history.push({role:'assistant',content:tr});setState('speaking','Speaking…');await speak(tr);busy=false;setState('','Tap the orb to speak');if(cfg.auto)setTimeout(listen,300);return}
   var code=!!cfg.code||CODE.test(q)||files.some(function(f){return f.text&&f.code});
   if(!files.length&&VID.test(q)){var vr='I can’t make videos yet, because free video generation isn’t available. I can create an image of it instead if you like.';typeOut(add('g',''),vr);history.push({role:'assistant',content:vr});setState('speaking','Speaking…');await speak(vr);busy=false;setState('','Tap the orb to speak');if(cfg.auto)setTimeout(listen,300);return}
   if(!files.length&&cfg.images&&IMG.test(q)){await makeImage(q);busy=false;setState('','Tap the orb to speak');if(cfg.auto)setTimeout(listen,300);return}
@@ -477,6 +478,7 @@ async function liveCtx(){
   return s;
 }
 var MADE=/\b(who|how)\s+(?:\w+\s+){0,2}(creat\w*|made|built|develop\w*|design\w*|program\w*|invent\w*)\s+(you|u)\b|\b(who|what)\s+(is|was|’s|'s)\s+(your|ur)\s+(creator|developer|maker|owner|father|builder)\b|\b(your|ur)\s+(creator|developer|maker)\b.*\?/i;
+var TECH=/\b(which|what)\s+(ai|a\.i\.|llm|model|ai model|technology|tech|engine|platform)\b.*\b(you|u)\b.*\b(run|running|runs|use|using|based|powered|built|work|works|on)\b|\b(which|what)\s+(ai|llm|model|ai model|technology|tech|engine)\s+(powers|runs|drives|are|r)\s+(you|u)\b|\bon\s+which\s+(ai|model|llm|technology|tech)\b.*\b(you|u)\b/i;
 var VID=/\b(generate|create|make|render|animate|produce)\b.*\b(video|clip|movie|animation)\b/i;
 var IMG=/\b(draw|paint|sketch|generate|create|make|design|render|show me|imagine)\b.*\b(image|picture|photo|illustration|artwork|art|wallpaper|logo|poster|painting|drawing|portrait)\b|^\s*(draw|paint|sketch|imagine)\b/i;
 async function makeImage(q){
