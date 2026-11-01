@@ -330,7 +330,8 @@ html[data-anim="reduced"] #orb.speaking .r2,html[data-anim="reduced"] #orb.think
   <div class="sbar"><button class="icn" id="back" aria-label="Back">←</button><h2>Settings</h2></div>
   <div class="sbody">
     <div class="card"><h3>AI connection</h3>
-      <label>API key<input type="password" id="key" data-k="key" placeholder="Paste your API key" autocomplete="off"><small>Saved only on this device.</small></label>
+      <div id="keybox"><label>API key<input type="password" id="key" data-k="key" placeholder="Paste your API key" autocomplete="off"><small>Saved only on this device. It hides itself once saved.</small></label></div>
+      <div class="row" id="keyset" style="display:none"><span>API key<small id="kmask"></small></span><button type="button" class="btn d" id="krm" style="flex:none;width:auto;padding:10px 16px">Remove key</button></div>
       <div class="btns"><button class="btn" id="test">Test connection</button></div>
       <div id="kmsg"></div>
     </div>
@@ -952,7 +953,23 @@ $('tourbtn').onclick=openTour;
   b.addEventListener('touchend',function(e){if(x0==null)return;var dx=e.changedTouches[0].clientX-x0;x0=null;if(dx<-50)$('tnext').onclick();else if(dx>50&&ti>0)tourShow(ti-1)},{passive:true});
 })();
 
+function keyUi(){
+  var has=!!(cfg.key||'').trim();
+  $('keybox').style.display=has?'none':'';$('keyset').style.display=has?'flex':'none';
+  $('kmask').textContent=has?'✓ Saved · '+cfg.key.slice(0,7)+'…'+cfg.key.slice(-4):'';
+}
+var kt=null;
+$('key').addEventListener('input',function(){
+  clearTimeout(kt);var v=this.value.replace(/\s+/g,'');
+  if(/^sk-ant-\S{30,}$/.test(v)){kt=setTimeout(function(){cfg.key=v;save();pill();keyUi();$('kmsg').style.color='#2ecc71';$('kmsg').textContent='✓ Key saved. Tap Test connection to check it.'},700)}
+});
+$('krm').onclick=function(){
+  if(!confirm('Remove your API key from this device?'))return;
+  cfg.key='';save();pill();$('key').value='';keyUi();$('kmsg').textContent='';
+  if(!history.length)empty();
+};
 function openSet(){
+  keyUi();
   syncK();
   $('cw').style.display=cfg.persona==='custom'?'flex':'none';$('kmsg').textContent='';fillVoices();applyTheme();$('memBox').value=(cfg.mem||[]).join('\n');instUi();
   $('settings').classList.add('open');
