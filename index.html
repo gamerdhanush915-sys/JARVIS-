@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#080203">
+<meta name="theme-color" content="#14051e">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Jarvis">
@@ -267,9 +267,93 @@ html[data-anim="reduced"] #orb .r2{animation-duration:9s}
 html[data-anim="reduced"] #orb.speaking .r2,html[data-anim="reduced"] #orb.thinking .r2{animation-duration:4s}
 @media (min-width:980px){#log{-webkit-mask-image:none;mask-image:none}}
 @media (min-width:980px) and (max-height:760px){.keys{display:none}}
+:root[data-theme="diwali"]{--bg:#14051e;--bg2:#3a0d3f;--fg:#fff4de;--mute:#dcb394;--card:rgba(66,16,62,.6);--line:rgba(255,190,90,.32);--on:#2b0a00;--glow:rgba(255,140,40,.6);--grid:rgba(255,200,110,.05);--r:18px}
+:root[data-accent="diya"]{--a:#ff7a18;--b:#ffd54a;--glow:rgba(255,140,40,.6)}
+html[data-theme="diwali"] body::before{background:radial-gradient(45% 38% at 20% 15%,rgba(255,120,30,.55),transparent 70%),radial-gradient(40% 35% at 85% 70%,rgba(255,61,129,.4),transparent 70%),radial-gradient(50% 40% at 50% 100%,rgba(255,200,70,.28),transparent 70%);opacity:.9}
+html[data-theme="diwali"] body::after{background-image:radial-gradient(rgba(255,213,74,.17) 1.2px,transparent 1.7px);background-size:30px 30px}
+html[data-theme="diwali"] #app{padding-top:30px}
+html[data-theme="diwali"] h1{letter-spacing:.38em;background:linear-gradient(90deg,#fff1c2,var(--b),#ff4f9a);-webkit-background-clip:text;background-clip:text;color:transparent}
+html[data-theme="diwali"] .logo{background:conic-gradient(from 0deg,#ffd54a,#ff4f9a,#ff7a18,#ffd54a);box-shadow:0 0 22px var(--glow)}
+html[data-theme="diwali"] .logo::after{background:var(--bg)}
+html[data-theme="diwali"] .m.u{background:linear-gradient(135deg,#ff7a18,#ffb02e 60%,#ffd54a);color:#2b0a00;box-shadow:0 8px 26px -8px var(--glow)}
+html[data-theme="diwali"] .m.g{background:linear-gradient(135deg,rgba(255,79,154,.14),var(--card));border:1px solid var(--line);border-left:3px solid #ffd54a;-webkit-backdrop-filter:none;backdrop-filter:none}
+html[data-theme="diwali"] .card{border-radius:18px;position:relative}
+html[data-theme="diwali"] .card h3{color:#ffd54a}
+html[data-theme="diwali"] .card::after{content:"✦";position:absolute;right:15px;top:11px;color:#ffd54a;opacity:.75;font-size:14px}
+html[data-theme="diwali"] select option{background:#2a0a2e;color:#fff4de}
+html[data-theme="diwali"] #orb .core{background:radial-gradient(circle at 50% 66%,#fffbe0 0,#ffe066 20%,#ffa11f 48%,#ff4d00 80%);box-shadow:0 0 40px var(--glow),0 0 90px -6px rgba(255,120,30,.8),inset 0 -10px 20px rgba(160,30,0,.45)}
+html[data-theme="diwali"] #orb .r1{border:1.5px dashed #ffd54a;opacity:.7}
+html[data-theme="diwali"] #orb .r2{border-top-color:#ff4f9a;border-bottom-color:#ffd54a}
+html[data-theme="diwali"] #orb .r3{inset:2px;border:0;opacity:.9;background:repeating-conic-gradient(#ff4f9a 0 7deg,transparent 7deg 24deg);-webkit-mask:radial-gradient(circle,transparent 70%,#000 71%,#000 79%,transparent 80%);mask:radial-gradient(circle,transparent 70%,#000 71%,#000 79%,transparent 80%);animation:spin 40s linear infinite reverse}
+html[data-theme="diwali"][data-anim="reduced"] #orb .r3{animation:none}
+#lights,#sparks{position:fixed;left:0;right:0;pointer-events:none;z-index:2;display:none}
+html[data-theme="diwali"] #lights,html[data-theme="diwali"] #sparks{display:block}
+html[data-anim="reduced"] #sparks,html[data-anim="off"] #sparks{display:none!important}
+#lights{top:0;height:28px}
+#lights::before{content:"";position:absolute;left:-3%;right:-3%;top:-16px;height:34px;border-bottom:2px solid rgba(255,213,74,.5);border-radius:0 0 50% 50%/0 0 100% 100%}
+#lights i{position:absolute;top:8px;width:9px;height:13px;border-radius:50% 50% 50% 50%/60% 60% 40% 40%;background:var(--c);box-shadow:0 0 10px 2px var(--c);animation:tw 1.8s ease-in-out infinite}
+@keyframes tw{0%,100%{opacity:.35;transform:scale(.85)}50%{opacity:1;transform:scale(1.1)}}
+#sparks{top:0;bottom:0;overflow:hidden}
+#sparks i{position:absolute;bottom:-12px;border-radius:50%;background:#ffd54a;box-shadow:0 0 8px 2px rgba(255,190,60,.8);opacity:0;animation:rise linear infinite}
+@keyframes rise{0%{transform:translate(0,0);opacity:0}10%{opacity:.9}100%{transform:translate(var(--dx,20px),-105vh);opacity:0}}
+#prov{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+#prov button{display:flex;flex-direction:column;align-items:center;gap:2px;padding:12px 8px;border-radius:14px;border:1px solid var(--line);background:var(--card);font-size:15px}
+#prov button small{font-size:11px;color:var(--mute);font-weight:500;letter-spacing:.06em;text-transform:uppercase}
+#prov button.on{border-color:var(--b);background:linear-gradient(135deg,rgba(255,122,24,.25),rgba(255,213,74,.12));box-shadow:0 0 18px -4px var(--glow)}
+#prov button.on b{color:var(--b)}
+#snav{width:100%;max-width:560px;display:flex;gap:8px;overflow-x:auto;padding:0 16px 12px;scrollbar-width:none;flex:none}
+#snav::-webkit-scrollbar{display:none}
+#snav button{flex:none;border:1px solid var(--line);background:var(--card);border-radius:99px;padding:8px 14px;font:600 11.5px ui-monospace,Menlo,Consolas,monospace;letter-spacing:.1em;text-transform:uppercase;color:var(--fg)}
+#snav button:active{transform:scale(.94)}
+#snav button:hover{border-color:var(--a)}
+.pill{cursor:pointer}
+button{touch-action:manipulation}
+#log{overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+body{-webkit-font-smoothing:antialiased}
+@media (min-width:900px){#snav{max-width:1000px}}
+
+/* ---------- voice mode ---------- */
+.vopen{width:50px;border-radius:16px;border:0;background:linear-gradient(135deg,var(--a),var(--b));color:var(--on);flex:none;display:grid;place-items:center;box-shadow:0 8px 24px -8px var(--glow)}
+.vopen:active{transform:scale(.9)}
+.vopen svg{width:24px;height:24px;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;fill:none}
+html[data-theme="hud"] .vopen{border-radius:4px}
+@media (min-width:980px) and (min-height:560px){.vopen{width:58px}}
+#vmode{position:fixed;inset:0;z-index:50;display:flex;flex-direction:column;align-items:center;overflow:hidden;background:radial-gradient(70% 50% at 50% 42%,var(--bg2),var(--bg) 78%);padding:env(safe-area-inset-top,0px) 16px calc(14px + env(safe-area-inset-bottom,0px));visibility:hidden;opacity:0;transition:opacity .3s,visibility 0s .3s}
+#vmode.open{visibility:visible;opacity:1;transition:opacity .3s}
+#vmode .vh{padding:18px 0 4px;font:700 13px ui-monospace,Menlo,Consolas,monospace;letter-spacing:.34em;text-transform:uppercase;color:var(--b);text-align:center}
+#vmode .vmid{flex:1;width:100%;max-width:560px;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center}
+.vorb{position:relative;width:min(64vw,300px,36vh);aspect-ratio:1;flex:none;border:0;padding:0;border-radius:50%;background:none;transition:opacity .3s}
+.vorb .vc{position:absolute;inset:0;border-radius:50%;overflow:hidden;background:linear-gradient(180deg,#fff6dc 0%,var(--b) 42%,var(--a) 100%);box-shadow:0 0 60px var(--glow),0 0 140px -10px var(--glow)}
+.vorb .vc::before,.vorb .vc::after{content:"";position:absolute;inset:-30%;will-change:transform}
+.vorb .vc::before{background:radial-gradient(40% 35% at 30% 30%,rgba(255,255,255,.95),transparent 70%),radial-gradient(45% 40% at 70% 60%,var(--b),transparent 70%);animation:spin 14s linear infinite;opacity:.9}
+.vorb .vc::after{background:radial-gradient(50% 45% at 60% 80%,var(--a),transparent 70%),radial-gradient(30% 30% at 25% 65%,rgba(255,255,255,.6),transparent 70%);animation:spin 22s linear infinite reverse}
+.vorb .vs{position:absolute;inset:0;border-radius:50%;border:2px solid var(--a);opacity:0;pointer-events:none}
+body[data-s="listening"] .vorb{animation:vpulse 1.8s ease-in-out infinite}
+body[data-s="listening"] .vorb .vs{animation:ring 1.8s ease-out infinite}
+body[data-s="speaking"] .vorb{animation:vtalk .7s ease-in-out infinite alternate}
+body[data-s="thinking"] .vorb{animation:breathe 1.2s ease-in-out infinite}
+body[data-s="thinking"] .vorb .vc::before{animation-duration:3s}
+#vmode.muted .vorb{opacity:.4}
+@keyframes vpulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+@keyframes vtalk{from{transform:scale(.92)}to{transform:scale(1.1)}}
+#vtxt{margin-top:26px;font:500 12px ui-monospace,Menlo,Consolas,monospace;letter-spacing:.1em;text-transform:uppercase;color:var(--mute);min-height:16px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#vcap{width:100%;max-height:20vh;overflow-y:auto;padding:0 6px;font-size:17px;line-height:1.5;color:var(--fg);opacity:.92;white-space:pre-wrap;scrollbar-width:none}
+#vcap::-webkit-scrollbar{display:none}
+#vmode .vbar{display:flex;gap:9px;align-items:center;width:100%;max-width:560px;margin:0}
+#vmode .vbar input{flex:1;border-radius:99px;padding:15px 20px}
+#vmode .vr{flex:none;width:52px;height:52px;border-radius:50%;border:1px solid var(--line);background:var(--card);display:grid;place-items:center;padding:0}
+#vmode .vr svg{width:22px;height:22px;stroke:var(--fg);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+#vmode .vr:active{transform:scale(.9)}
+#vmode .vr .off{display:none}
+#vmode.muted .vr .on{display:none}
+#vmode.muted .vr .off{display:block}
+#vmode.muted #vmute{border-color:var(--a)}
+#vmode .vr.x{background:#fff;border-color:#fff}
+#vmode .vr.x svg{stroke:#000}
 </style>
 </head>
 <body>
+<div id="lights"></div><div id="sparks"></div>
 <div id="app">
   <header>
     <div class="brand"><div class="logo"></div><h1>JARVIS</h1><span class="pill" id="pill"><i></i><em id="pt" style="font-style:normal">No key</em></span></div>
@@ -283,12 +367,13 @@ html[data-anim="reduced"] #orb.speaking .r2,html[data-anim="reduced"] #orb.think
     <div class="wave" id="wave"><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b></div>
     <button id="orb" aria-label="Talk" title="Talk (Space)"><span class="r1"></span><span class="r3"></span><span class="r2"></span><span class="core"></span></button>
     <button class="live" id="live"></button>
+    <button class="live" id="vopen2">◉ Voice mode</button>
     <button class="live on" id="stopb" style="display:none">■ Stop speaking</button>
     <div class="keys" aria-hidden="true"><kbd>Space</kbd><span>Talk</span><kbd>/</kbd><span>Type a message</span><kbd>Esc</kbd><span>Stop or close</span><kbd>Ctrl+K</kbd><span>New chat</span><kbd>Ctrl+,</kbd><span>Settings</span></div>
     </div>
     <div class="comp">
     <div id="att"></div>
-    <form id="f"><button type="button" class="plus" id="plus" aria-label="Add to chat">+</button><input type="text" id="t" placeholder="Message Jarvis…" autocomplete="off"><button class="send" type="submit" aria-label="Send">➤</button></form>
+    <form id="f"><button type="button" class="plus" id="plus" aria-label="Add to chat">+</button><input type="text" id="t" placeholder="Message Jarvis…" autocomplete="off"><button class="vopen" type="button" id="vopen" aria-label="Voice mode" title="Voice mode"><svg viewBox="0 0 24 24"><path d="M4 10v4M8 6v12M12 3v18M16 7v10M20 10v4"/></svg></button><button class="send" type="submit" id="sendb" aria-label="Send" style="display:none">➤</button></form>
     </div>
   </div>
 </div>
@@ -328,12 +413,16 @@ html[data-anim="reduced"] #orb.speaking .r2,html[data-anim="reduced"] #orb.think
 
 <section id="settings" aria-label="Settings">
   <div class="sbar"><button class="icn" id="back" aria-label="Back">←</button><h2>Settings</h2></div>
+  <div id="snav"></div>
   <div class="sbody">
     <div class="card"><h3>AI connection</h3>
-      <div id="keybox"><label>API key<input type="password" id="key" data-k="key" placeholder="Paste your API key" autocomplete="off"><small>Saved only on this device. It hides itself once saved.</small></label></div>
-      <div class="row" id="keyset" style="display:none"><span>API key<small id="kmask"></small></span><button type="button" class="btn d" id="krm" style="flex:none;width:auto;padding:10px 16px">Remove key</button></div>
+      <p class="note">Paste your API key below. Add a second key as a backup if you like.</p>
+      <div id="keybox1"><label>API key<input type="password" id="key1" placeholder="Paste your API key" autocomplete="off"><small>Saved only on this device.</small></label></div>
+      <div class="row" id="keyset1" style="display:none"><span>API key<small id="kmask1"></small></span><button type="button" class="btn d" id="krm1" style="flex:none;width:auto;padding:10px 16px">Remove key</button></div>
+      <div id="keybox2"><label>API key (optional)<input type="password" id="key2" placeholder="Paste a second API key" autocomplete="off"><small>A backup. Jarvis switches to it if the first key fails.</small></label></div>
+      <div class="row" id="keyset2" style="display:none"><span>API key (optional)<small id="kmask2"></small></span><button type="button" class="btn d" id="krm2" style="flex:none;width:auto;padding:10px 16px">Remove key</button></div>
       <div class="btns"><button class="btn" id="test">Test connection</button></div>
-      <div id="kmsg"></div>
+      <div id="kmsg" style="white-space:pre-wrap"></div>
     </div>
 
     <div class="card"><h3>Personality</h3>
@@ -375,8 +464,9 @@ html[data-anim="reduced"] #orb.speaking .r2,html[data-anim="reduced"] #orb.think
 
     <div class="card"><h3>Appearance</h3>
       <label>Animations<select data-k="anim"><option value="full">Full (smoothest look)</option><option value="reduced">Reduced</option><option value="off">Off (fastest)</option></select></label>
-      <label>Theme<select data-k="theme"><option value="hud">Iron Man HUD (red &amp; gold)</option><option value="auto">Match phone</option><option value="dark">Dark</option><option value="light">Light</option></select></label>
+      <label>Theme<select data-k="theme"><option value="diwali">Diwali ✨ (festive)</option><option value="hud">Iron Man HUD (red &amp; gold)</option><option value="auto">Match phone</option><option value="dark">Dark</option><option value="light">Light</option></select></label>
       <label>Accent color<div class="seg" id="acc">
+        <button class="dot" data-ac="diya" style="background:linear-gradient(135deg,#ff7a18,#ffd54a)" aria-label="Diya"></button>
         <button class="dot" data-ac="red" style="background:linear-gradient(135deg,#ff3b2f,#ffc247)" aria-label="Red gold"></button>
         <button class="dot" data-ac="blue" style="background:linear-gradient(135deg,#1a8cff,#16d6e8)" aria-label="Blue"></button>
         <button class="dot" data-ac="purple" style="background:linear-gradient(135deg,#8f6bff,#e06bff)" aria-label="Purple"></button>
@@ -393,7 +483,7 @@ html[data-anim="reduced"] #orb.speaking .r2,html[data-anim="reduced"] #orb.think
     <div class="card"><h3>App</h3>
       <div class="btns"><button class="btn" id="tourbtn">Quick tutorial</button><button class="btn" id="upd">Update app</button><button class="btn" id="inst" style="display:none">Install app</button></div>
       <p class="note" id="instn"></p>
-      <p class="note">Version 21 · “Update app” clears the saved copy and reloads the newest files.</p>
+      <p class="note">Version 26 · “Update app” clears the saved copy and reloads the newest files.</p>
     </div>
 
     <div class="card"><h3>Data</h3>
@@ -405,24 +495,43 @@ html[data-anim="reduced"] #orb.speaking .r2,html[data-anim="reduced"] #orb.think
   </div>
 </section>
 
+<div id="vmode" aria-hidden="true">
+  <div class="vh">Jarvis Voice</div>
+  <div class="vmid">
+    <button type="button" class="vorb" id="vorb" aria-label="Tap to talk or interrupt"><span class="vc"></span><span class="vs"></span></button>
+    <div id="vtxt"></div>
+    <div id="vcap"></div>
+  </div>
+  <form id="vf" class="vbar" autocomplete="off">
+    <input type="text" id="vin" placeholder="Ask Jarvis" autocomplete="off">
+    <button type="button" class="vr" id="vmute" aria-label="Mute microphone"><svg class="on" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg><svg class="off" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3M4 4l16 16"/></svg></button>
+    <button type="button" class="vr x" id="vx" aria-label="End voice mode"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+  </form>
+</div>
+
 <script>
 (function(){
 var $=function(i){return document.getElementById(i)};
-var D={key:'',voice:'',rate:1,pitch:.9,lang:'en-US',persona:'butler',custom:'',name:'',length:'short',theme:'hud',accent:'red',voiceOn:true,auto:false,code:false,weather:false,city:'',units:'c',hud:true,images:true,imgStyle:'',anim:'full',lat:null,lon:null,saveChat:true,wake:false,mem:[]};
-var cfg=load(),history=[],busy=false,rec=null,blocked=false,wx=null,wxAt=0,wt=null;
+var PN={gemini:'Gemini',openai:'ChatGPT'};
+var D={key:'',voice:'',rate:1,pitch:.9,lang:'en-US',persona:'butler',custom:'',name:'',length:'short',theme:'diwali',accent:'diya',voiceOn:true,auto:false,code:false,weather:false,city:'',units:'c',hud:true,images:true,imgStyle:'',anim:'full',lat:null,lon:null,saveChat:true,wake:false,mem:[],provider:'gemini',keyG:'',keyO:'',key1:'',key2:''};
+var cfg=load(),history=[],busy=false,rec=null,blocked=false,wx=null,wxAt=0,wt=null,vm=false,vmMuted=false;
 function load(){var c={};try{c=JSON.parse(localStorage.getItem('jarvis_cfg')||'{}')}catch(e){}
-  if(!c.key){try{c.key=localStorage.getItem('jarvis_key')||''}catch(e){}}var o=Object.assign({},D,c);if(/^sk-ant-/.test(o.key||''))o.key='';if(c.tv!==2){o.theme='hud';o.accent='red';o.tv=2}return o}
+  if(!c.key){try{c.key=localStorage.getItem('jarvis_key')||''}catch(e){}}var o=Object.assign({},D,c);if(/^sk-ant-/.test(o.key||''))o.key='';if(o.key){if(/^AIza/.test(o.key)&&!o.keyG)o.keyG=o.key;else if(/^sk-/.test(o.key)&&!o.keyO)o.keyO=o.key}o.key='';['keyG','keyO','key1','key2'].forEach(function(k){o[k]=String(o[k]||'');if(/^sk-ant-/.test(o[k]))o[k]=''});if(!o.key1&&!o.key2){o.key1=o.keyG;o.key2=o.keyO}o.keyG=o.keyO='';if(!o.key1&&o.key2){o.key1=o.key2;o.key2=''}if(c.tv!==3){o.theme='diwali';o.accent='diya';o.tv=3}return o}
 function save(){try{localStorage.setItem('jarvis_cfg',JSON.stringify(cfg))}catch(e){}}
-var log=$('log'),orb=$('orb'),st=$('status');
+var log=$('log'),orb=$('orb'),st=$('status'),vmode=$('vmode'),vtxt=$('vtxt'),vcap=$('vcap');
 var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
 
 function applyTheme(){
   var h=document.documentElement;h.dataset.theme=cfg.theme;h.dataset.accent=cfg.accent;h.dataset.anim=cfg.anim;
   document.querySelectorAll('#acc .dot').forEach(function(d){d.classList.toggle('sel',d.dataset.ac===cfg.accent)});
 }
-function pill(){var ok=!!cfg.key.trim();$('pill').className='pill'+(ok?' ok':'');$('pt').textContent=ok?'Ready':'No key'}
+function kind(k){return /^AIza/.test(k)?'gemini':'openai'}
+function provs(){var r=[];[cfg.key1,cfg.key2].forEach(function(k){k=String(k||'').replace(/\s+/g,'');if(k)r.push({p:kind(k),k:k})});return r}
+function hasKey(){return provs().length>0}
+function pill(){var ps=provs(),ok=ps.length>0;$('pill').className='pill'+(ok?' ok':'');$('pt').textContent=ok?(ps.length>1?'2 keys':'Ready'):'No key'}
 function isDesk(){return !!(window.matchMedia&&window.matchMedia('(min-width:980px) and (min-height:560px) and (hover:hover)').matches)}
 function setState(s,t){
+  if(vm&&s===''&&t==='Tap the orb to speak')t=vmMuted?'Mic muted · tap the mic to unmute':'Tap the orb to talk';
   if(s===''&&t==='Tap the orb to speak'){var dk=isDesk();t=cfg.wake&&SR?(dk?'Say “Hey Jarvis” or click the orb':'Say “Hey Jarvis” or tap the orb'):(dk?'Click the orb or press Space':t)}
   orb.className=s;document.body.dataset.s=s;st.textContent=t;
   var sb=$('stopb');if(sb)sb.style.display=s==='speaking'?'':'none';
@@ -432,8 +541,8 @@ function empty(){
   log.innerHTML='';
   var e=document.createElement('div');e.className='empty';
   var nm=cfg.name?', '+cfg.name:'';
-  e.innerHTML='<h2>Hello'+nm.replace(/</g,'')+'.</h2><p>'+(cfg.key.trim()?'How can I help you today?':'Add your free API key to get started.')+'</p>';
-  if(cfg.key.trim()){var c=document.createElement('div');c.className='chips';
+  e.innerHTML='<h2>'+(cfg.theme==='diwali'?'Happy Diwali':'Hello')+nm.replace(/</g,'')+(cfg.theme==='diwali'?' 🪔':'.')+'</h2><p>'+(hasKey()?'How can I help you today?':'Open settings and add your API key.')+'</p>';
+  if(hasKey()){var c=document.createElement('div');c.className='chips';
     ['What’s the weather?','Draw a neon futuristic city','What time is it?','Tell me a fun fact','Remind me in 5 minutes to stretch'].forEach(function(t){var b=document.createElement('button');b.className='chip';b.textContent=t;b.onclick=function(){ask(t)};c.appendChild(b)});e.appendChild(c)}
   else{var b=document.createElement('button');b.className='cta';b.textContent='Open settings';b.onclick=openSet;e.appendChild(b)}
   var tl=document.createElement('button');tl.className='lnk';tl.style.cssText='display:block;margin:16px auto 0';tl.textContent='Take the quick tutorial';tl.onclick=openTour;e.appendChild(tl);
@@ -453,7 +562,8 @@ function fillVoices(){
 }
 function speak(text){
   return new Promise(function(res){
-    if(!cfg.voiceOn||!window.speechSynthesis){res();return}
+    if(vm)vcapSet(String(text).replace(/[*_#`>]/g,''));
+    if((!cfg.voiceOn&&!vm)||!window.speechSynthesis){res();return}
     try{
       speechSynthesis.cancel();
       var u=new SpeechSynthesisUtterance(text.replace(/[*_#`>]/g,''));
@@ -479,7 +589,7 @@ function listen(){
     for(var i=ev.resultIndex;i<ev.results.length;i++){var tr=ev.results[i][0].transcript;if(ev.results[i].isFinal){fin+=tr;got=true}else itm+=tr}
     st.textContent=(fin+itm)||'Listening…'};
   rec.onerror=function(ev){if(ev.error==='not-allowed'||ev.error==='service-not-allowed')blocked=true;setState('',ev.error==='not-allowed'?'Microphone access was blocked.':ev.error==='no-speech'?'I didn’t catch anything.':'Voice input error.')};
-  rec.onend=function(){rec=null;if(got&&fin.trim())ask(fin);else{if(orb.className==='listening')setState('','Tap the orb to speak');if(cfg.auto&&!blocked&&!busy&&!$('settings').classList.contains('open'))setTimeout(listen,500)}};
+  rec.onend=function(){rec=null;if(got&&fin.trim())ask(fin);else{if(orb.className==='listening')setState('','Tap the orb to speak');if(auto()&&!blocked&&!busy&&!$('settings').classList.contains('open'))setTimeout(listen,500)}};
   try{rec.start()}catch(e){rec=null;setState('','Couldn’t start the microphone.')}
 }
 
@@ -491,9 +601,9 @@ function sysPrompt(ctx,code){
   var rules=code?' You are also an expert senior software engineer. For coding requests write complete, correct, runnable code in fenced code blocks with a language tag. Keep explanations brief and outside the code, say how to run it, handle errors and edge cases, and follow modern best practices. Never read code aloud. Code answers may be as long as needed.':' Your replies are spoken aloud, so write plain conversational text with no markdown, lists or emoji. '+L[cfg.length]+' If the user asks for code, put it in fenced code blocks with a language tag.';
   return 'You are Jarvis, '+P[cfg.persona]+'. You were created by Dhanush. If asked who created, made, built or developed you, answer that Dhanush created you. If asked which AI or technology you run on, say you are running on Jarvis AI technology. If asked directly which company or model you are built on, say you are Jarvis and you can’t share details of the underlying model; never claim to be human.'+rules+(cfg.name?' The user’s name is '+cfg.name+'.':'')+' Reply in the language the user writes in.'+ctx+' You have no other live data such as news; say so briefly if asked.';
 }
-async function ai(msgs,system,maxTok,o){
+async function aiG(msgs,system,maxTok,o){
   o=o||{};
-  var key=cfg.key.replace(/\s+/g,'');
+  var key=String(o.key||'').replace(/\s+/g,'');
   if(!key){var e0=new Error('nokey');throw e0}
   var contents=msgs.map(function(m){
     var parts=(m.files||[]).map(function(f){return {inlineData:{mimeType:f.mime,data:f.data}}});
@@ -523,11 +633,59 @@ async function ai(msgs,system,maxTok,o){
   return ((c&&c.parts)||[]).map(function(p){return p.text||''}).join('').trim();
 }
 
+function retryable(e){var st=e&&e.status;return st===500||st===502||st===503||st===504||st===404||(st===429&&!/quota|billing|credit/i.test(e.detail||''))}
+async function aiO(msgs,system,maxTok,o){
+  o=o||{};
+  var key=String(o.key||'').replace(/\s+/g,'');
+  if(!key){var e0=new Error('nokey');throw e0}
+  var messages=[{role:'system',content:system}].concat(msgs.map(function(m){
+    var txt=(m.content&&m.content.trim())?m.content:'(attachment)';
+    if(m.role==='assistant')return {role:'assistant',content:txt};
+    var parts=[{type:'text',text:txt}];
+    (m.files||[]).forEach(function(f,i){
+      if(f.mime==='application/pdf')parts.push({type:'file',file:{filename:'document'+(i+1)+'.pdf',file_data:'data:application/pdf;base64,'+f.data}});
+      else parts.push({type:'image_url',image_url:{url:'data:'+f.mime+';base64,'+f.data}});
+    });
+    return {role:'user',content:parts.length>1?parts:txt};
+  }));
+  var tries=o.smart?['gpt-4.1','gpt-4o','gpt-4.1-mini']:['gpt-4.1-mini','gpt-4o-mini','gpt-4.1'];
+  var j=null,last=null;
+  for(var i=0;i<tries.length&&!j;i++){
+    var ctl=new AbortController(),tm=setTimeout(function(){ctl.abort()},o.timeout||15000);
+    try{
+      var r=await fetch('https://api.openai.com/v1/chat/completions',{method:'POST',headers:{'content-type':'application/json','authorization':'Bearer '+key},body:JSON.stringify({model:tries[i],messages:messages,max_completion_tokens:maxTok||800}),signal:ctl.signal});
+      clearTimeout(tm);
+      if(r.ok){j=await r.json();break}
+      var er=new Error('http');er.status=r.status;
+      try{var ej=await r.json();er.detail=(ej.error&&ej.error.message)||''}catch(x){}
+      last=er;if(!retryable(er))throw er;
+    }catch(e){clearTimeout(tm);if(e&&e.status&&!retryable(e))throw e;last=e}
+    if(!j&&i<tries.length-1)st.textContent='Switching model…';
+  }
+  if(!j)throw last||new Error('failed');
+  var c=j.choices&&j.choices[0]&&j.choices[0].message;
+  return String((c&&c.content)||'').trim();
+}
+async function ai(msgs,system,maxTok,o){
+  var ps=provs();if(!ps.length)throw new Error('nokey');
+  var last=null;
+  for(var i=0;i<ps.length;i++){
+    try{var oo=Object.assign({},o,{key:ps[i].k});return ps[i].p==='openai'?await aiO(msgs,system,maxTok,oo):await aiG(msgs,system,maxTok,oo)}
+    catch(e){if(e&&typeof e==='object')e.prov=ps[i].p;last=e;if(i<ps.length-1)st.textContent='Switching to backup key…'}
+  }
+  throw last;
+}
 function errText(e){
   if(e.message==='nokey')return 'Please add your API key in settings first.';
   if(!navigator.onLine)return 'You appear to be offline. Check your connection and try again.';
   if(e.name==='AbortError')return 'The AI took too long to answer. Please try again.';
   var d=e.status?' ['+e.status+(e.detail?': '+e.detail.slice(0,140):'')+']':' ['+(e.message||'network')+']';
+  var pv=e.prov||(provs()[0]||{}).p;
+  if(pv==='openai'){
+    if(e.status===401)return 'The AI service rejected your API key. Check it in settings.'+d;
+    if(e.status===429&&/quota|billing|credit/i.test(e.detail||''))return 'Your account has no credit. Add billing with your AI provider, then try again.';
+    if(e.status===429)return 'The AI service is rate limiting me. Try again in a minute.'+d;
+  }
   if(e.status===400||e.status===401||e.status===403)return 'The AI service rejected your API key. Check it in settings.'+d;
   if(e.status===429)return 'I’ve hit the free usage limit. Try again in a minute.'+d;
   return 'I couldn’t reach the AI service right now.'+d;
@@ -537,16 +695,16 @@ async function ask(q){
   q=(q||'').trim();if((!q&&!files.length)||busy)return;
   if(!q)q=files.some(function(f){return f.mime})?'Look at this and tell me what you see, or answer any question in it.':'Review this file and explain it.';
   busy=true;stopWake();atts=[];renderAtt();
-  addUser(q,files);
+  addUser(q,files);if(vm)vcapSet(q);
   var content=q;files.forEach(function(f){if(f.text)content+='\n\nFile '+f.name+':\n```\n'+f.text.slice(0,40000)+'\n```'});
   var entry={role:'user',content:content,files:files.filter(function(f){return f.data}).map(function(f){return {mime:f.mime,data:f.data}})};
   history.push(entry);
-  if(!files.length&&MADE.test(q)){var mr='Dhanush created me.';var md=add('g','');typeOut(md,mr);history.push({role:'assistant',content:mr});setState('speaking','Speaking…');await speak(mr);busy=false;setState('','Tap the orb to speak');if(cfg.auto)setTimeout(listen,300);return}
-  if(!files.length&&TECH.test(q)){var tr='I am running on Jarvis AI technology.';var td=add('g','');typeOut(td,tr);history.push({role:'assistant',content:tr});setState('speaking','Speaking…');await speak(tr);busy=false;setState('','Tap the orb to speak');if(cfg.auto)setTimeout(listen,300);return}
+  if(!files.length&&MADE.test(q)){var mr='Dhanush created me.';var md=add('g','');typeOut(md,mr);history.push({role:'assistant',content:mr});setState('speaking','Speaking…');await speak(mr);busy=false;setState('','Tap the orb to speak');if(auto())setTimeout(listen,300);return}
+  if(!files.length&&TECH.test(q)){var tr='I am running on Jarvis AI technology.';var td=add('g','');typeOut(td,tr);history.push({role:'assistant',content:tr});setState('speaking','Speaking…');await speak(tr);busy=false;setState('','Tap the orb to speak');if(auto())setTimeout(listen,300);return}
   if(!files.length){var lr=localCmd(q);if(lr){await say(lr);return}}
   var code=!!cfg.code||CODE.test(q)||files.some(function(f){return f.text&&f.code});
-  if(!files.length&&VID.test(q)){var vr='I can’t make videos yet, because free video generation isn’t available. I can create an image of it instead if you like.';typeOut(add('g',''),vr);history.push({role:'assistant',content:vr});setState('speaking','Speaking…');await speak(vr);busy=false;setState('','Tap the orb to speak');if(cfg.auto)setTimeout(listen,300);return}
-  if(!files.length&&cfg.images&&IMG.test(q)){await makeImage(q);busy=false;setState('','Tap the orb to speak');if(cfg.auto)setTimeout(listen,300);return}
+  if(!files.length&&VID.test(q)){var vr='I can’t make videos yet, because free video generation isn’t available. I can create an image of it instead if you like.';typeOut(add('g',''),vr);history.push({role:'assistant',content:vr});setState('speaking','Speaking…');await speak(vr);busy=false;setState('','Tap the orb to speak');if(auto())setTimeout(listen,300);return}
+  if(!files.length&&cfg.images&&IMG.test(q)){await makeImage(q);busy=false;setState('','Tap the orb to speak');if(auto())setTimeout(listen,300);return}
   setState('thinking',code?'Writing code…':'Thinking…');var typing=dots(),reply,ok=true;
   try{
     var msgs=history.slice(-16);while(msgs.length&&msgs[0].role!=='user')msgs.shift();
@@ -559,7 +717,7 @@ async function ask(q){
   if(ok)addCopy(d,reply);
   if(ok){setState('speaking','Speaking…  (tap orb to stop)');await speak(speakText(reply))}
   busy=false;setState('','Tap the orb to speak');
-  if(ok&&cfg.auto&&!$('settings').classList.contains('open'))setTimeout(listen,300);
+  if(ok&&auto()&&!$('settings').classList.contains('open'))setTimeout(listen,300);
 }
 
 /* ---------- live data, images, effects ---------- */
@@ -625,7 +783,7 @@ async function makeImage(q){
     im.onerror=function(){end(false)};
     im.src=url;
   });
-  var msg=okImg?'Here you go.':'The free image service is busy right now. Please try again in a moment.';
+  var msg=okImg?(vm?'Here you go. Close voice mode to see it.':'Here you go.'):'The free image service is busy right now. Please try again in a moment.';
   if(!okImg){box.className='m g';box.textContent=msg}
   history.push({role:'assistant',content:okImg?'[I generated an image of: '+prompt+']':msg});
   setState('speaking','Speaking…');await speak(msg);
@@ -716,6 +874,7 @@ function renderAtt(){
     var x=document.createElement('button');x.type='button';x.textContent='✕';x.onclick=function(){atts.splice(i,1);renderAtt()};
     c.appendChild(x);a.appendChild(c);
   });
+  if(typeof updSend==='function')updSend();
 }
 function toast(m){st.textContent=m}
 function readB64(file){return new Promise(function(ok,no){var r=new FileReader();r.onload=function(){ok(String(r.result).split(',')[1])};r.onerror=no;r.readAsDataURL(file)})}
@@ -798,7 +957,7 @@ function addCopy(d,txt){
 async function say(r){
   var d=add('g','');typeOut(d,r);history.push({role:'assistant',content:r});
   setState('speaking','Speaking…');await speak(r);
-  busy=false;setState('','Tap the orb to speak');if(cfg.auto)setTimeout(listen,300);
+  busy=false;setState('','Tap the orb to speak');if(auto())setTimeout(listen,300);
 }
 
 /* reminders, timers and memory are handled on the device, no AI call needed */
@@ -879,7 +1038,7 @@ function tick(){
 /* wake word: "Hey Jarvis" */
 function stopWake(){var w=wrec;wrec=null;if(w){w.onend=null;w.onresult=null;w.onerror=null;try{w.abort()}catch(e){}}}
 function startWake(){
-  if(!cfg.wake||!SR||wrec||rec||busy||cfg.auto||blocked||wakeBlocked||document.hidden||$('settings').classList.contains('open'))return;
+  if(!cfg.wake||!SR||wrec||rec||busy||cfg.auto||vm||blocked||wakeBlocked||document.hidden||$('settings').classList.contains('open'))return;
   var w=new SR();wrec=w;w.lang=cfg.lang;w.continuous=true;w.interimResults=true;
   w.onresult=function(ev){
     for(var i=ev.resultIndex;i<ev.results.length;i++){
@@ -923,12 +1082,12 @@ $('memBox').oninput=function(){cfg.mem=this.value.split('\n').map(function(x){re
 /* ---------- settings ---------- */
 /* ---------- quick tutorial ---------- */
 var TOUR=[
- {n:'01',t:'Talk to Jarvis',d:'Tap the glowing orb and speak. Tap it again while Jarvis is talking to stop him. You can also type in the box at the bottom.',ex:['What’s the weather?','Tell me a fun fact']},
+ {n:'01',t:'Talk to Jarvis',d:'Tap the glowing orb and speak. Tap it again while Jarvis is talking to stop him. For a full-screen, hands-free conversation, tap the waveform button next to the message box.',ex:['What’s the weather?','Voice mode ▮▮▮']},
  {n:'02',t:'Go hands-free',d:'Turn on Live chat and Jarvis listens again after every reply. In Settings, under Voice, you can also switch on the wake word and just say “Hey Jarvis”.',ex:['Hey Jarvis','Live chat on']},
  {n:'03',t:'Add to chat (+)',d:'Tap + to take a photo, pick a picture, or attach a PDF or code file, then ask about it. Turn on Pro code mode for long, complete code with a Copy button.',ex:['Explain this photo','Fix the bug in this file']},
  {n:'04',t:'Create and explore',d:'Say “draw” to make an image. Turn on Live weather in the + menu for local weather and time. Video isn’t available yet.',ex:['Draw a neon city','What time is it?']},
  {n:'05',t:'Memory and reminders',d:'Jarvis remembers facts and sets reminders and timers. Keep the app open so alerts can reach you.',ex:['Remember that I like jazz','Remind me in 10 minutes to stretch','Set a timer for 5 minutes','Forget everything']},
- {n:'06',t:'Make it yours',d:'Open ⚙ to change personality, voice, theme and colors. Tap ✎ for a new chat. You can install Jarvis from Settings to open it like a real app.',ex:['⚙ Settings','✎ New chat']}
+ {n:'06',t:'Make it yours',d:'Open ⚙ to add your API keys, change personality, voice and theme. Tap ✎ for a new chat. You can install Jarvis from Settings to open it like a real app.',ex:['⚙ Settings','✎ New chat']}
 ];
 var tr=document.getElementById('tour'),ti=0;
 function tourShow(i){
@@ -953,22 +1112,46 @@ $('tourbtn').onclick=openTour;
 })();
 
 function keyUi(){
-  var has=!!(cfg.key||'').trim();
-  $('keybox').style.display=has?'none':'';$('keyset').style.display=has?'flex':'none';
-  $('kmask').textContent=has?'✓ Saved · '+cfg.key.slice(0,7)+'…'+cfg.key.slice(-4):'';
+  ['1','2'].forEach(function(S){
+    var k=String(cfg['key'+S]||'').trim(),has=!!k;
+    $('keybox'+S).style.display=has?'none':'';$('keyset'+S).style.display=has?'flex':'none';
+    $('kmask'+S).textContent=has?'✓ Saved · '+k.slice(0,7)+'…'+k.slice(-4):'';
+  });
 }
-var kt=null;
-$('key').addEventListener('input',function(){
-  clearTimeout(kt);var v=this.value.replace(/\s+/g,'');
-  if(/^AIza\S{30,}$/.test(v)){kt=setTimeout(function(){cfg.key=v;save();pill();keyUi();$('kmsg').style.color='#2ecc71';$('kmsg').textContent='✓ Key saved. Tap Test connection to check it.'},700)}
+$('pill').onclick=openSet;
+function snavInit(){
+  var n=$('snav');if(n.children.length)return;
+  document.querySelectorAll('#settings .card').forEach(function(c){
+    var h=c.querySelector('h3');if(!h)return;
+    var b=document.createElement('button');b.type='button';b.textContent=h.textContent;
+    b.onclick=function(){c.scrollIntoView({behavior:cfg.anim==='off'?'auto':'smooth',block:'start'})};n.appendChild(b);
+  });
+}
+(function(){
+  var cols=['#ffd54a','#ff4f9a','#ff7a18','#4ee0a0','#ffd54a','#7aa8ff'],L=$('lights'),S=$('sparks');
+  for(var i=0;i<16;i++){var b=document.createElement('i');b.style.left=(3+i*6.1)+'%';b.style.setProperty('--c',cols[i%cols.length]);b.style.animationDelay=((i%5)*.35)+'s';L.appendChild(b)}
+  for(var k=0;k<16;k++){var s=document.createElement('i'),z=2+Math.random()*3;s.style.left=Math.round(Math.random()*100)+'%';s.style.width=s.style.height=z+'px';s.style.setProperty('--dx',(Math.random()*80-40)+'px');s.style.animationDuration=(7+Math.random()*8)+'s';s.style.animationDelay=(-Math.random()*12)+'s';S.appendChild(s)}
+})();
+var KOK=/^(AIza\S{30,}|sk-(?!ant-)\S{30,})$/,kt={};
+['1','2'].forEach(function(S){
+  var other=S==='1'?'2':'1';
+  $('key'+S).addEventListener('input',function(){
+    clearTimeout(kt[S]);var v=this.value.replace(/\s+/g,''),m=$('kmsg');
+    if(/^sk-ant-/.test(v)){m.style.color='#e5484d';m.textContent='That key type isn’t supported. Check your key and try again.';return}
+    if(KOK.test(v)){kt[S]=setTimeout(function(){
+      if(v===cfg['key'+other]){m.style.color='#e5484d';m.textContent='That key is already saved.';return}
+      cfg['key'+S]=v;if(!cfg.key1&&cfg.key2){cfg.key1=cfg.key2;cfg.key2=''}save();pill();keyUi();$('key'+S).value='';
+      m.style.color='#2ecc71';m.textContent='✓ Key saved. Tap Test connection to check it.'},700)}
+  });
+  $('krm'+S).onclick=function(){
+    if(!confirm('Remove this API key from this device?'))return;
+    cfg['key'+S]='';if(!cfg.key1&&cfg.key2){cfg.key1=cfg.key2;cfg.key2=''}
+    save();pill();$('key'+S).value='';keyUi();$('kmsg').textContent='';
+    if(!history.length)empty();
+  };
 });
-$('krm').onclick=function(){
-  if(!confirm('Remove your API key from this device?'))return;
-  cfg.key='';save();pill();$('key').value='';keyUi();$('kmsg').textContent='';
-  if(!history.length)empty();
-};
 function openSet(){
-  keyUi();
+  snavInit();keyUi();
   syncK();
   $('cw').style.display=cfg.persona==='custom'?'flex':'none';$('kmsg').textContent='';fillVoices();applyTheme();$('memBox').value=(cfg.mem||[]).join('\n');instUi();
   $('settings').classList.add('open');
@@ -988,17 +1171,66 @@ document.querySelectorAll('[data-k]').forEach(function(el){
 });
 document.querySelectorAll('#acc .dot').forEach(function(d){d.onclick=function(){cfg.accent=d.dataset.ac;save();applyTheme()}});
 $('test').onclick=async function(){
-  var m=$('kmsg');m.style.color='var(--mute)';m.textContent='Testing…';
-  try{var t=await ai([{role:'user',content:'Reply with one word: ready'}],'Reply briefly.',50);m.style.color='#2ecc71';m.textContent='✓ Connected. Jarvis replied: '+(t||'ok')}
-  catch(e){m.style.color='#e5484d';m.textContent=errText(e)}
+  var m=$('kmsg'),ps=provs();
+  if(!ps.length){m.style.color='#e5484d';m.textContent='Add an API key first.';return}
+  m.style.color='var(--mute)';m.textContent='Testing…';
+  var out=[],bad=false;
+  for(var i=0;i<ps.length;i++){
+    var x=ps[i],lbl=ps.length>1?'Key '+(i+1):'Key';
+    try{await (x.p==='openai'?aiO:aiG)([{role:'user',content:'Reply with one word: ready'}],'Reply briefly.',50,{key:x.k});out.push('✓ '+lbl+' connected')}
+    catch(e){bad=true;e.prov=x.p;out.push('✗ '+lbl+': '+errText(e))}
+  }
+  m.style.color=bad?'#e5484d':'#2ecc71';m.textContent=out.join('\n');
 };
 $('tv').onclick=function(){speak('Hello'+(cfg.name?', '+cfg.name:'')+'. This is how I sound.')};
 $('clr').onclick=function(){history=[];saveChat();empty();closeSet()};
 $('rst').onclick=function(){if(confirm('Reset all settings, including your API key?')){cfg=Object.assign({},D);try{localStorage.removeItem('jarvis_cfg');localStorage.removeItem('jarvis_key');localStorage.removeItem('jarvis_chat');localStorage.removeItem('jarvis_rem')}catch(e){}rems=[];stopWake();history=[];applyTheme();pill();empty();openSet()}};
 $('gear').onclick=openSet;$('back').onclick=closeSet;$('done').onclick=closeSet;
 
+/* ---------- full-screen voice mode ---------- */
+function vcapSet(t){vcap.textContent=t||'';vcap.scrollTop=0}
+function auto(){return (cfg.auto||vm)&&!vmMuted}
+function killRec(){var r=rec;rec=null;if(r){r.onend=null;r.onresult=null;r.onerror=null;try{r.abort()}catch(e){}}}
+function openVoice(){
+  if(vm)return;
+  if(!hasKey()){openSet();return}
+  closeSheet();
+  vm=true;vmMuted=false;vmode.classList.remove('muted');vmode.classList.add('open');vmode.setAttribute('aria-hidden','false');
+  vcapSet('');blocked=false;stopWake();vtxt.textContent=st.textContent;
+  if(!SR){vtxt.textContent='Voice input isn’t supported in this browser. Type below.';return}
+  if(!busy&&!rec)listen();
+}
+function closeVoice(){
+  if(!vm)return;
+  vm=false;vmMuted=false;
+  vmode.classList.remove('open','muted');vmode.setAttribute('aria-hidden','true');
+  killRec();if(window.speechSynthesis)speechSynthesis.cancel();
+  if(!busy)setState('','Tap the orb to speak');
+}
+new MutationObserver(function(){if(vm)vtxt.textContent=st.textContent}).observe(st,{childList:true,characterData:true,subtree:true});
+$('vopen').onclick=openVoice;$('vopen2').onclick=openVoice;$('vx').onclick=closeVoice;
+$('vmute').onclick=function(){
+  vmMuted=!vmMuted;vmode.classList.toggle('muted',vmMuted);
+  var talking=!!(window.speechSynthesis&&speechSynthesis.speaking);
+  if(vmMuted){killRec();if(!busy&&!talking)setState('','Tap the orb to speak')}
+  else{blocked=false;if(!busy&&!rec&&!talking)listen();else if(!busy&&!talking)setState('','Tap the orb to speak')}
+};
+$('vorb').onclick=function(){
+  blocked=false;
+  if(window.speechSynthesis&&speechSynthesis.speaking){speechSynthesis.cancel();return}
+  if(vmMuted){$('vmute').click();return}
+  listen();
+};
+$('vf').onsubmit=function(e){
+  e.preventDefault();if(busy)return;
+  var v=$('vin').value;if(!v.trim())return;$('vin').value='';
+  if(window.speechSynthesis)speechSynthesis.cancel();killRec();ask(v);
+};
+function updSend(){var has=!!$('t').value.trim()||atts.length>0;$('vopen').style.display=has?'none':'';$('sendb').style.display=has?'':'none'}
+$('t').addEventListener('input',updSend);
+
 orb.onclick=function(){blocked=false;try{if(cfg.anim!=='off'&&navigator.vibrate)navigator.vibrate(12)}catch(e){}if(window.speechSynthesis&&speechSynthesis.speaking){speechSynthesis.cancel();return}listen()};
-$('f').onsubmit=function(e){e.preventDefault();var v=$('t').value;$('t').value='';ask(v)};
+$('f').onsubmit=function(e){e.preventDefault();var v=$('t').value;$('t').value='';updSend();ask(v)};
 if(window.speechSynthesis){speechSynthesis.onvoiceschanged=fillVoices;speechSynthesis.getVoices()}
 applyTheme();pill();empty();restoreChat();if(!cfg.toured){cfg.toured=true;save();setTimeout(openTour,900)}
 liveUi();hud();setInterval(hud,15000);
@@ -1012,11 +1244,12 @@ if(cfg.weather&&(cfg.lat!=null||cfg.city.trim()))getWx().then(hud);
   var tin=$('t'),dz=$('drop'),mac=/Mac|iPhone|iPad/i.test(navigator.platform||navigator.userAgent);
   if(mac)Array.prototype.forEach.call(document.querySelectorAll('.keys kbd'),function(k){k.textContent=k.textContent.replace('Ctrl','⌘')});
   function setOpen(){return $('settings').classList.contains('open')}
-  function modalOpen(){return setOpen()||sh.classList.contains('open')||tr.classList.contains('open')}
+  function modalOpen(){return vm||setOpen()||sh.classList.contains('open')||tr.classList.contains('open')}
   function typing(el){return !!el&&(el.tagName==='INPUT'||el.tagName==='TEXTAREA'||el.tagName==='SELECT'||el.isContentEditable)}
   document.addEventListener('keydown',function(e){
     var mod=e.ctrlKey||e.metaKey;
     if(e.key==='Escape'){
+      if(vm){closeVoice();return}
       if(tr.classList.contains('open')){closeTour();return}
       if(sh.classList.contains('open')){closeSheet();return}
       if(setOpen()){closeSet();if(isDesk())tin.focus();return}
