@@ -411,7 +411,7 @@ var $=function(i){return document.getElementById(i)};
 var D={key:'',voice:'',rate:1,pitch:.9,lang:'en-US',persona:'butler',custom:'',name:'',length:'short',theme:'hud',accent:'red',voiceOn:true,auto:false,code:false,weather:false,city:'',units:'c',hud:true,images:true,imgStyle:'',anim:'full',lat:null,lon:null,saveChat:true,wake:false,mem:[]};
 var cfg=load(),history=[],busy=false,rec=null,blocked=false,wx=null,wxAt=0,wt=null;
 function load(){var c={};try{c=JSON.parse(localStorage.getItem('jarvis_cfg')||'{}')}catch(e){}
-  if(!c.key){try{c.key=localStorage.getItem('jarvis_key')||''}catch(e){}}var o=Object.assign({},D,c);if(/^AIza/.test(o.key||''))o.key='';if(c.tv!==2){o.theme='hud';o.accent='red';o.tv=2}return o}
+  if(!c.key){try{c.key=localStorage.getItem('jarvis_key')||''}catch(e){}}var o=Object.assign({},D,c);if(/^sk-ant-/.test(o.key||''))o.key='';if(c.tv!==2){o.theme='hud';o.accent='red';o.tv=2}return o}
 function save(){try{localStorage.setItem('jarvis_cfg',JSON.stringify(cfg))}catch(e){}}
 var log=$('log'),orb=$('orb'),st=$('status');
 var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
@@ -495,19 +495,20 @@ async function ai(msgs,system,maxTok,o){
   o=o||{};
   var key=cfg.key.replace(/\s+/g,'');
   if(!key){var e0=new Error('nokey');throw e0}
-  var messages=msgs.map(function(m){
-    var parts=(m.files||[]).map(function(f){return f.mime==='application/pdf'?{type:'document',source:{type:'base64',media_type:'application/pdf',data:f.data}}:{type:'image',source:{type:'base64',media_type:f.mime,data:f.data}}});
-    parts.push({type:'text',text:(m.content&&m.content.trim())?m.content:'(attachment)'});
-    return {role:m.role==='assistant'?'assistant':'user',content:parts};
+  var contents=msgs.map(function(m){
+    var parts=(m.files||[]).map(function(f){return {inlineData:{mimeType:f.mime,data:f.data}}});
+    parts.push({text:(m.content&&m.content.trim())?m.content:'(attachment)'});
+    return {role:m.role==='assistant'?'model':'user',parts:parts};
   });
-  var fast='claude-haiku-5-5',smart='claude-sonnet-5-5';
+  var fast='gemini-flash-lite-latest',smart='gemini-flash-latest';
   var tries=o.smart?[smart,fast,smart]:[fast,smart,fast];
-  var RETRY=[529,503,500,429,404];
+  var RETRY=[503,500,429,404];
+  var body=JSON.stringify({systemInstruction:{parts:[{text:system}]},contents:contents,generationConfig:{maxOutputTokens:maxTok||800}});
   var j=null,last=null;
   for(var i=0;i<tries.length&&!j;i++){
     var ctl=new AbortController(),tm=setTimeout(function(){ctl.abort()},o.timeout||12000);
     try{
-      var r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'content-type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:tries[i],max_tokens:maxTok||800,system:system,messages:messages}),signal:ctl.signal});
+      var r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+tries[i]+':generateContent?key='+encodeURIComponent(key),{method:'POST',headers:{'content-type':'application/json'},body:body,signal:ctl.signal});
       clearTimeout(tm);
       if(r.ok){j=await r.json();break}
       var er=new Error('http');er.status=r.status;
@@ -518,7 +519,8 @@ async function ai(msgs,system,maxTok,o){
     if(!j&&i<tries.length-1)st.textContent='Switching model…';
   }
   if(!j)throw last||new Error('failed');
-  return (j.content||[]).filter(function(b){return b.type==='text'}).map(function(b){return b.text}).join('').trim();
+  var c=j.candidates&&j.candidates[0]&&j.candidates[0].content;
+  return ((c&&c.parts)||[]).map(function(p){return p.text||''}).join('').trim();
 }
 
 function errText(e){
@@ -526,11 +528,8 @@ function errText(e){
   if(!navigator.onLine)return 'You appear to be offline. Check your connection and try again.';
   if(e.name==='AbortError')return 'The AI took too long to answer. Please try again.';
   var d=e.status?' ['+e.status+(e.detail?': '+e.detail.slice(0,140):'')+']':' ['+(e.message||'network')+']';
-  if(e.status===400&&/credit/i.test(e.detail||''))return 'Your API credit balance is too low. Add credits to your account, then try again.';
-  if(e.status===401||e.status===403)return 'The AI service rejected your API key. Check it in settings.'+d;
-  if(e.status===400)return 'The AI service couldn’t process that request.'+d;
-  if(e.status===429)return 'I’m being rate limited. Try again in a minute.'+d;
-  if(e.status===529)return 'The AI service is overloaded right now. Try again in a moment.'+d;
+  if(e.status===400||e.status===401||e.status===403)return 'The AI service rejected your API key. Check it in settings.'+d;
+  if(e.status===429)return 'I’ve hit the free usage limit. Try again in a minute.'+d;
   return 'I couldn’t reach the AI service right now.'+d;
 }
 async function ask(q){
@@ -961,7 +960,7 @@ function keyUi(){
 var kt=null;
 $('key').addEventListener('input',function(){
   clearTimeout(kt);var v=this.value.replace(/\s+/g,'');
-  if(/^sk-ant-\S{30,}$/.test(v)){kt=setTimeout(function(){cfg.key=v;save();pill();keyUi();$('kmsg').style.color='#2ecc71';$('kmsg').textContent='✓ Key saved. Tap Test connection to check it.'},700)}
+  if(/^AIza\S{30,}$/.test(v)){kt=setTimeout(function(){cfg.key=v;save();pill();keyUi();$('kmsg').style.color='#2ecc71';$('kmsg').textContent='✓ Key saved. Tap Test connection to check it.'},700)}
 });
 $('krm').onclick=function(){
   if(!confirm('Remove your API key from this device?'))return;
